@@ -1,0 +1,32 @@
+{
+  "timeZone": "America/Los_Angeles",
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
+  "webapp": {
+    "executeAs": "USER_ACCESSING",
+    "access": "ANYONE"
+  },
+  "urlFetchWhitelist": [
+    "https://*.my.salesforce.com/",
+    "https://login.salesforce.com/"
+  ],
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/spreadsheets.currentonly",
+    "https://www.googleapis.com/auth/script.container.ui",
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/script.scriptapp"
+  ],
+  "addOns": {
+    "common": {
+      "name": "RevTools",
+      "logoUrl": "https://cdn.pixabay.com/photo/2014/04/03/11/58/rocket-312767__340.png",
+      "layoutProperties": {
+        "primaryColor": "#2772ed"
+      },
+      "homepageTrigger": {
+        "runFunction": "onHomepage"
+      }
+    },
+    "sheets": {}
+  }
+}
