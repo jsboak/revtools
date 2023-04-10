@@ -101,7 +101,7 @@ function createSheetForNewTerritory(e) {
   //Format accordingly
   today = mm + '/' + dd + '/' + yyyy;
 
-  var territoryMapName = "Territory Map " + today;
+  var territoryMapName = "Territory Map";// + today;
   var newSheetTab = activeSpreadsheet.getSheetByName(territoryMapName);
 
   //WE MAY WANT TO REMOVE THIS. THIS DELETES AN EXISTING TERRITORY MAP IF ONE OF THE SAME NAME ALREADY EXISTS

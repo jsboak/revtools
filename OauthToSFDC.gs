@@ -26,21 +26,26 @@ function onHomepage(e) {
   if(isTokenValid()) {
 
     builder.addSection(CardService.newCardSection()
-    .addWidget(CardService.newButtonSet()
-      .addButton(CardService.newTextButton()
-        .setText('Build Territory Map')
-        .setTextButtonStyle(CardService.TextButtonStyle.FILLED)
-        .setOnClickAction(CardService.newAction().setFunctionName('handleTerritory'))
-        .setDisabled(false))));
+    .addWidget(CardService.newDecoratedText()
+      .setText("Build Territory Map")
+      .setBottomLabel("Choose the fields that will help you manage your territory.")
+      .setOnClickAction(CardService.newAction().setFunctionName('handleTerritory'))
+      .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.MULTIPLE_PEOPLE))
+      .setWrapText(true)));
 
     builder.addSection(CardService.newCardSection()
       .setHeader("Actions")
-      .addWidget(CardService.newButtonSet()
-        .addButton(CardService.newTextButton()
-          .setText('Set Threshold')
-          .setOnClickAction(CardService.newAction().setFunctionName('setThreshold'))
-        )
-      )
+      .addWidget(CardService.newDecoratedText()
+        .setText("Configure Thresholds")
+        .setOnClickAction(CardService.newAction().setFunctionName('goToThresholdBuilder'))
+        .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.DESCRIPTION))
+        .setBottomLabel("Get notified when specified fields match desired criteria.")
+        .setWrapText(true))
+      .addWidget(CardService.newDecoratedText()
+        .setText("Set Reminder")
+        .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.CLOCK))
+        .setBottomLabel("Set reminders for yourself related to certain accounts.")
+        .setWrapText(true))
     )
 
   } else {
