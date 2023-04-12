@@ -38,7 +38,7 @@ function onHomepage(e) {
       .addWidget(CardService.newDecoratedText()
         .setText("Configure Thresholds")
         .setOnClickAction(CardService.newAction().setFunctionName('goToThresholdBuilder'))
-        .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.DESCRIPTION))
+        .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.PHONE))
         .setBottomLabel("Get notified when specified fields match desired criteria.")
         .setWrapText(true))
       .addWidget(CardService.newDecoratedText()

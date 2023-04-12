@@ -23,13 +23,39 @@ function thresholdBuilder(e) {
     .addWidget(CardService.newSelectionInput().setTitle("Threshold Inequality")
     .setFieldName("thresholdInequality")
     .setType(CardService.SelectionInputType.DROPDOWN)
-    .addItem("Greater Than",">",false)
-    .addItem("Less Than","<",false)
-    .addItem("Equal To","=",false)
-    ))
+    .addItem("Greater Than","Greater Than",false)
+    .addItem("Less Than","Greater Than",false)
+    .addItem("Equal To","Equal To",false)
+    )
+    .addWidget(CardService.newTextInput()
+      .setFieldName("thresholdValue")
+      .setTitle("Threshold Value")
+    )
+  )
 
-  builder.addSection(
-    //Add text field for threshold metric (e.g. 90) here -> Example threshold would be: when Days Until Renewal = 90
+  builder.addSection(CardService.newCardSection()
+    .setHeader("Notification Preferences")
+    // .addWidget(CardService.newImage().setImageUrl("https://freeiconshop.com/wp-content/uploads/edd/phone-flat.png"))
+    .addWidget(CardService.newSelectionInput().setTitle("Notification Method")
+      .setFieldName("notificationMethod")
+      .setType(CardService.SelectionInputType.DROPDOWN)
+      .addItem("None","none",true)
+      .addItem("E-mail","E-mail",false)
+      .addItem("Slack (Coming soon!)","slack",false)
+      .addItem("Calendar Event (Coming soon!)","calendar",false)
+    )
+    .addWidget(CardService.newDecoratedText()
+    // .setTopLabel("Highlight")
+    .setText("Highlight Territory Map Cell")
+    .setWrapText(true)
+    .setSwitchControl(CardService.newSwitch()
+        .setFieldName("form_input_switch_key")
+        .setValue("form_input_switch_value")
+        // .setOnChangeAction(CardService.newAction()
+        //     .setFunctionName("handleSwitchChange")
+        //     )
+      )
+    )
   )
 
   builder.addSection(CardService.newCardSection()
@@ -45,6 +71,8 @@ function thresholdBuilder(e) {
 }
 
 function setThreshold(e) {
+
+  Logger.log(e);
 
   var rangeList = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getActiveRangeList().getRanges();
   var sheet = SpreadsheetApp.getActiveSheet();
@@ -64,7 +92,15 @@ function setThreshold(e) {
       var accountName = sheet.getRange(row,1).getValue();
       var fieldName = sheet.getRange(1,column).getValue();
       var fieldId = sheet.getRange(2,column).getValue();
-      thresholdList.push({"Account":accountName, "SFDCID":accountId, "fieldName":fieldName, "fieldId":fieldId})
+      thresholdList.push({
+        "Account":accountName, 
+        "SFDCID":accountId, 
+        "fieldName":fieldName, 
+        "fieldId":fieldId, 
+        "thresholdInequality":e.formInput.thresholdInequality,
+        "thresholdValue":e.formInput.thresholdValue,
+        "notificationMethod":e.formInput.notificationMethod
+        })
 
     }
   }
@@ -106,11 +142,13 @@ function createThresholdMap() {
 
     thresholdSheet.getRange(1,2).setValue("Configured Field")
 
-    thresholdSheet.getRange(1,3).setValue("Threshold")
+    thresholdSheet.getRange(1,3).setValue("Threshold Conditional")
 
-    thresholdSheet.getRange(1,4).setValue("Notification Method")
+    thresholdSheet.getRange(1,4).setValue("Threshold Metric")
 
-    thresholdSheet.getRange(1,5).setValue("Threshold Description")
+    thresholdSheet.getRange(1,5).setValue("Notification Method")
+
+    thresholdSheet.getRange(1,6).setValue("Threshold Description")
 
     thresholdSheet.getRange(1,25).setValue("Configured Field ID")
     thresholdSheet.getRange(1,26).setValue("Account ID")
@@ -138,7 +176,9 @@ function addThresholdsToSheet(thresholdList) {
     sheet.getRange(emptyRow+i,26).setValue(thresholdList[i].SFDCID);
     sheet.getRange(emptyRow+i,2).setValue(thresholdList[i].fieldName);
     sheet.getRange(emptyRow+i,25).setValue(thresholdList[i].fieldId)
-
+    sheet.getRange(emptyRow+i,3).setValue(thresholdList[i].thresholdInequality)
+    sheet.getRange(emptyRow+i,4).setValue(thresholdList[i].thresholdValue)
+    sheet.getRange(emptyRow+i,5).setValue(thresholdList[i].notificationMethod)
 
   }
 }
