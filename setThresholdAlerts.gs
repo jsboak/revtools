@@ -24,12 +24,18 @@ function thresholdBuilder(e) {
     .setFieldName("thresholdInequality")
     .setType(CardService.SelectionInputType.DROPDOWN)
     .addItem("Greater Than","Greater Than",false)
-    .addItem("Less Than","Greater Than",false)
+    .addItem("Less Than","Less Than",false)
     .addItem("Equal To","Equal To",false)
     )
     .addWidget(CardService.newTextInput()
       .setFieldName("thresholdValue")
       .setTitle("Threshold Value")
+    )
+    .addWidget(CardService.newTextInput()
+      .setMultiline(true)
+      .setTitle("Threshold Description")
+      .setFieldName("thresholdDescription")
+      .setHint("Example: Notify me when customer is 90 days from renewal.")
     )
   )
 
@@ -51,9 +57,6 @@ function thresholdBuilder(e) {
     .setSwitchControl(CardService.newSwitch()
         .setFieldName("form_input_switch_key")
         .setValue("form_input_switch_value")
-        // .setOnChangeAction(CardService.newAction()
-        //     .setFunctionName("handleSwitchChange")
-        //     )
       )
     )
   )
@@ -99,14 +102,14 @@ function setThreshold(e) {
         "fieldId":fieldId, 
         "thresholdInequality":e.formInput.thresholdInequality,
         "thresholdValue":e.formInput.thresholdValue,
-        "notificationMethod":e.formInput.notificationMethod
+        "notificationMethod":e.formInput.notificationMethod,
+        "thresholdDescription":e.formInput.thresholdDescription
         })
 
     }
   }
 
   createThresholdMap();
-
 }
 
 function createThresholdMap() {
@@ -179,8 +182,12 @@ function addThresholdsToSheet(thresholdList) {
     sheet.getRange(emptyRow+i,3).setValue(thresholdList[i].thresholdInequality)
     sheet.getRange(emptyRow+i,4).setValue(thresholdList[i].thresholdValue)
     sheet.getRange(emptyRow+i,5).setValue(thresholdList[i].notificationMethod)
+    sheet.getRange(emptyRow+i,6).setValue(thresholdList[i].thresholdDescription)
 
   }
+
+  SpreadsheetApp.setActiveSheet(SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds"));
+
 }
 
 function getFirstEmptyRowByColumnArray() {

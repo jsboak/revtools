@@ -23,6 +23,10 @@
       "layoutProperties": {
         "primaryColor": "#2772ed"
       },
+      "universalActions": [{
+          "label": "Sign Out of Salesforce",
+          "runFunction": "signOutOfSalesforce"
+        }],
       "homepageTrigger": {
         "runFunction": "onHomepage"
       }

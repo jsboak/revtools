@@ -48,6 +48,24 @@ function onHomepage(e) {
         .setWrapText(true))
     )
 
+    builder.addSection(CardService.newCardSection()
+    .addWidget(CardService.newDecoratedText()
+      .setText("Test Thresholds")
+      .setOnClickAction(CardService.newAction().setFunctionName('buildThresholdList'))
+      .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.MULTIPLE_PEOPLE))
+      .setWrapText(true)));
+
+    //TODO: potentially add a footer with a link to our website or support-docs
+    // var fixedFooter =
+    //   CardService
+    //       .newFixedFooter()
+    //       .setPrimaryButton(
+    //           CardService
+    //               .newTextButton()
+    //               .setText("Help")
+    //               .setOpenLink(CardService.newOpenLink().setUrl("http://www.google.com")));
+    // builder.setFixedFooter(fixedFooter);
+
   } else {
     builder.addSection(CardService.newCardSection()
     .addWidget(CardService.newButtonSet()
@@ -55,7 +73,9 @@ function onHomepage(e) {
         .setText('Authenticate')
         .setTextButtonStyle(CardService.TextButtonStyle.FILLED)
         .setOpenLink(CardService.newOpenLink()
-            .setUrl(getURLForAuthorization()+"'target='_blank'"))
+            .setUrl(getURLForAuthorization()+"'target='_blank'")
+            .setOnClose(CardService.OnClose.RELOAD_ADD_ON)
+            .setOpenAs(CardService.OpenAs.OVERLAY))
         .setDisabled(false))));
 
   }
@@ -67,11 +87,10 @@ function onHomepage(e) {
 function doGet(e) {
   var HTMLToOutput;
 
-  // if(e.parameter.code){//if we get "code" as a parameter in, then this is a callback. we can make this more explicit
-  //   // Logger.log("Code: " + e.parameter.code);
     getAndStoreAccessToken2(e.parameters.code);
-    HTMLToOutput = '<html><h1>Finished authenticating</h1>Redirecting back to spreadsheet.</html>';
-  // }
+    HTMLToOutput = '<html><span style="font-family: Arial"><h2>Finished authenticating.</h2>You can close this window.</span></html>';
+    
+  // onHomepage(e);
   return HtmlService.createHtmlOutput(HTMLToOutput);
 }
 
