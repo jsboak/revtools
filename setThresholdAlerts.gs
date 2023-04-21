@@ -153,6 +153,8 @@ function createThresholdMap() {
 
     thresholdSheet.getRange(1,6).setValue("Threshold Description")
 
+    thresholdSheet.getRange(1,7).setValue("Current Value");
+
     thresholdSheet.getRange(1,25).setValue("Configured Field ID")
     thresholdSheet.getRange(1,26).setValue("Account ID")
 
