@@ -16,10 +16,10 @@ function buildThresholdList() {
     var currentValue = territoryMap.getCell(accountRowMap[accountId], fieldIdColumnMap[fieldId]).getValue();
     Logger.log("Current value for " + accountId + " at " + fieldId + " is: " + currentValue);
 
-    thresholds.getCell(j+1,7).setValue(currentValue); //TODO: move away from hardcoded column value
+    thresholds.getCell(j+1,3).setValue(currentValue); //TODO: move away from hardcoded column value
 
-    var inequality = configuredThresholds.getRange(j+1,3).getValue().toString(); //move away from hardcoded column value
-    var thresholdValue = configuredThresholds.getRange(j+1,4).getValue(); //move away from hardcoded column value
+    var inequality = configuredThresholds.getRange(j+1,4).getValue().toString(); //move away from hardcoded column value
+    var thresholdValue = configuredThresholds.getRange(j+1,5).getValue(); //move away from hardcoded column value
 
     if( (inequality == "Less Than" && currentValue < thresholdValue) || 
         (inequality == "Greater Than" && currentValue > thresholdValue) || 

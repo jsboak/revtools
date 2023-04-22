@@ -1,26 +1,41 @@
 function createNewTerritoryMap(e) {
 
-  var territoryMapSheet = createSheetForNewTerritory(e);
+  var territorySheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Territory Map");
+  if(territorySheet != null) {
+    Logger.log("Territory map already exists - adding to existing map");
 
-  addDataToNewTerritoryMap(territoryMapSheet, e);
+    addDataToNewTerritoryMap(territorySheet, e); //Need to create new method for adding columns to existing sheet -> this is different than updating existing columns
 
-  PropertiesService.getUserProperties().setProperty("territoryMapName", territoryMapSheet.getName());
+  } else {
 
-  Logger.log(PropertiesService.getUserProperties().getProperty("territoryMapName"))
+    Logger.log("Creating new territory map");
+
+    var territoryMapSheet = createSheetForNewTerritory(e);
+
+    addDataToNewTerritoryMap(territoryMapSheet, e);
+
+    PropertiesService.getUserProperties().setProperty("territoryMapName", territoryMapSheet.getName());
+
+  }
 
   return CardService.newActionResponseBuilder()
-  .setNotification(CardService.newNotification()
-      .setText("Retrieved your accounts from Salesforce"))
-  .setNavigation(CardService.newNavigation().popCard())
+    .setNotification(CardService.newNotification()
+        .setText("Retrieved your accounts from Salesforce"))
+    .setNavigation(CardService.newNavigation().popCard())
 
-  .build();
+    .build();
 
 }
+
+
 
 function addDataToNewTerritoryMap(territorySheet, e) {
   var accounts = JSON.parse(retrieveAccountsOwnedByCurrentUser(e));
 
-  var rowCounter = 3;
+  var opportunities = JSON.parse(retrieveOpenOpps(currentSfdcUser));
+
+  const emptyRow = getFirstEmptyRowByColumnArray("Territory Map");
+  var rowCounter = emptyRow;
   for(let i=0; i < accounts.totalSize; i++) {
 
     let accountName = accounts.records[i].Name;
@@ -59,29 +74,40 @@ function addDataToNewTerritoryMap(territorySheet, e) {
   territorySheet.autoResizeColumn(1);
 }
 
-function retrieveAccountsOwnedByCurrentUser(e) {
+var currentSfdcUser;
 
+function getCurrentSfdcUser() {
+  Logger.log("Retrieving currently logged in user");
   var currentSfdcUserRequest = salesforceEntryPoint("https://login.salesforce.com/services/oauth2/userinfo","get","",false);
 
   var currentSFDCUserResponse = JSON.parse(currentSfdcUserRequest);
-  var currentSfdcUser = currentSFDCUserResponse.user_id;
+  currentSfdcUser = currentSFDCUserResponse.user_id;
 
   //For testing:
   // Chris' userID
-  var currentSfdcUser = '0058Y00000CFhvzQAD'
+  currentSfdcUser = '0058Y00000CFhvzQAD'
 
   // Jakes's userID
   // var currentSfdcUser = '0058Y00000CFhwsQAD'
+
+  // return currentSfdcUser;
+}
+
+function retrieveAccountsOwnedByCurrentUser(e) {
 
   var revenue = e.formInput.revenue;
   var renewalDate = e.formInput.renewalDate;
   var accountScore = e.formInput.accountScore;
 
+  if (currentSfdcUser == null) {
+    getCurrentSfdcUser();
+  }
+
   var soql = `SELECT+name+,+Id+,+${revenue}+,+${renewalDate}+,+${accountScore}+from+Account+WHERE+OwnerId='${currentSfdcUser}'`;
   var getDataURL = '/services/data/v57.0/query/?q='+soql;
 
   var accounts = salesforceEntryPoint(userProperties.getProperty(baseURLPropertyName) + getDataURL,"get","",false);
-  Logger.log(accounts)
+  Logger.log("Retrieved accounts from SFDC");
 
   return accounts;
 

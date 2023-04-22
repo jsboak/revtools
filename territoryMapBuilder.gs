@@ -1,18 +1,23 @@
 function handleTerritory(e) {
-    try {       
-          let nav = CardService.newNavigation().pushCard(goToTerritoryBuilder(e));
-            return CardService.newActionResponseBuilder()
-            .setNavigation(nav)
-            .build();
+  if(isTokenValid()) {
+      try {       
+            let nav = CardService.newNavigation().pushCard(goToTerritoryBuilder(e));
+              return CardService.newActionResponseBuilder()
+              .setNavigation(nav)
+              .build();
 
-    }catch(e){
-    Logger.log(e);
-    }
+      }catch(e){
+      Logger.log(e);
+      }
+  } else {
+    return onHomepage(e);
+  }
 }
 
 function goToTerritoryBuilder(e) {
 
   var title = 'Territory Builder';
+
 
   if(isTokenValid()) {
 

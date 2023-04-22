@@ -116,7 +116,6 @@ function createThresholdMap() {
 
   var thresholdSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds");
 
-  //WE MAY WANT TO REMOVE THIS. THIS DELETES AN EXISTING TERRITORY MAP IF ONE OF THE SAME NAME ALREADY EXISTS
   if (thresholdSheet != null) {
       
     Logger.log("Threshold sheet already exists, adding thresholds to existing sheet")
@@ -145,15 +144,15 @@ function createThresholdMap() {
 
     thresholdSheet.getRange(1,2).setValue("Configured Field")
 
-    thresholdSheet.getRange(1,3).setValue("Threshold Conditional")
+    thresholdSheet.getRange(1,3).setValue("Current Value");
 
-    thresholdSheet.getRange(1,4).setValue("Threshold Metric")
+    thresholdSheet.getRange(1,4).setValue("Threshold Conditional")
 
-    thresholdSheet.getRange(1,5).setValue("Notification Method")
+    thresholdSheet.getRange(1,5).setValue("Threshold Metric")
 
-    thresholdSheet.getRange(1,6).setValue("Threshold Description")
+    thresholdSheet.getRange(1,6).setValue("Notification Method")
 
-    thresholdSheet.getRange(1,7).setValue("Current Value");
+    thresholdSheet.getRange(1,7).setValue("Threshold Description")
 
     thresholdSheet.getRange(1,25).setValue("Configured Field ID")
     thresholdSheet.getRange(1,26).setValue("Account ID")
@@ -173,7 +172,7 @@ function addThresholdsToSheet(thresholdList) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds");
   
   Logger.log("First empty row: " + getFirstEmptyRowByColumnArray())
-  const emptyRow = getFirstEmptyRowByColumnArray();
+  const emptyRow = getFirstEmptyRowByColumnArray("Configured Thresholds");
 
   for(i=0; i < thresholdList.length; i++) {
 
@@ -181,10 +180,10 @@ function addThresholdsToSheet(thresholdList) {
     sheet.getRange(emptyRow+i,26).setValue(thresholdList[i].SFDCID);
     sheet.getRange(emptyRow+i,2).setValue(thresholdList[i].fieldName);
     sheet.getRange(emptyRow+i,25).setValue(thresholdList[i].fieldId)
-    sheet.getRange(emptyRow+i,3).setValue(thresholdList[i].thresholdInequality)
-    sheet.getRange(emptyRow+i,4).setValue(thresholdList[i].thresholdValue)
-    sheet.getRange(emptyRow+i,5).setValue(thresholdList[i].notificationMethod)
-    sheet.getRange(emptyRow+i,6).setValue(thresholdList[i].thresholdDescription)
+    sheet.getRange(emptyRow+i,4).setValue(thresholdList[i].thresholdInequality)
+    sheet.getRange(emptyRow+i,5).setValue(thresholdList[i].thresholdValue)
+    sheet.getRange(emptyRow+i,6).setValue(thresholdList[i].notificationMethod)
+    sheet.getRange(emptyRow+i,7).setValue(thresholdList[i].thresholdDescription)
 
   }
 
@@ -192,8 +191,8 @@ function addThresholdsToSheet(thresholdList) {
 
 }
 
-function getFirstEmptyRowByColumnArray() {
-  var spr = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds");
+function getFirstEmptyRowByColumnArray(sheetName) {
+  var spr = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
   var column = spr.getRange('A:A');
   var values = column.getValues(); // get all data in one call
   var ct = 0;
