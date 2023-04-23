@@ -56,6 +56,7 @@ function thresholdBuilder(e) {
     .setWrapText(true)
     .setSwitchControl(CardService.newSwitch()
         .setFieldName("form_input_switch_key")
+        .setSelected(true)
         .setValue("form_input_switch_value")
       )
     )

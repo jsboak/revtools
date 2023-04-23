@@ -32,8 +32,6 @@ function createNewTerritoryMap(e) {
 function addDataToNewTerritoryMap(territorySheet, e) {
   var accounts = JSON.parse(retrieveAccountsOwnedByCurrentUser(e));
 
-  var opportunities = JSON.parse(retrieveOpenOpps(currentSfdcUser));
-
   const emptyRow = getFirstEmptyRowByColumnArray("Territory Map");
   var rowCounter = emptyRow;
   for(let i=0; i < accounts.totalSize; i++) {
@@ -66,6 +64,24 @@ function addDataToNewTerritoryMap(territorySheet, e) {
 
     var accountRenewalCell = territorySheet.getRange(rowCounter,4);
     accountRenewalCell.setValue(accountScore);
+
+    if(accounts.records[i].Opportunities) {
+
+      Logger.log(accounts.records[i].Opportunities);
+
+      var openOppIdCell = territorySheet.getRange(rowCounter,25);
+      var openOppId = accounts.records[i].Opportunities.records[0].Id;
+      openOppIdCell.setValue(openOppId);
+      
+      var openOppCell = territorySheet.getRange(rowCounter,7);
+      var openOppName = accounts.records[i].Opportunities.records[0].Name;
+      openOppCell.setValue(openOppName);
+
+      var openOppNextStepCell = territorySheet.getRange(rowCounter,8);
+      var openOppNextStep = accounts.records[i].Opportunities.records[0].NextStep;
+      openOppNextStepCell.setValue(openOppNextStep);
+
+    }
 
     rowCounter++;
 
@@ -103,11 +119,17 @@ function retrieveAccountsOwnedByCurrentUser(e) {
     getCurrentSfdcUser();
   }
 
-  var soql = `SELECT+name+,+Id+,+${revenue}+,+${renewalDate}+,+${accountScore}+from+Account+WHERE+OwnerId='${currentSfdcUser}'`;
+  var opp_query = "";
+  if(e.formInput.include_open_opp_key) {
+    opp_query = `,+(SELECT+Opportunity.Id,+Opportunity.Name,+Opportunity.NextStep+FROM+Account.Opportunities+WHERE+IsClosed+=+FALSE+LIMIT+1)`;
+  }
+
+  var soql = `SELECT+name+,+Id+,+${revenue}+,+${renewalDate}+,+${accountScore}${opp_query}+from+Account+WHERE+OwnerId='${currentSfdcUser}'`;
   var getDataURL = '/services/data/v57.0/query/?q='+soql;
 
   var accounts = salesforceEntryPoint(userProperties.getProperty(baseURLPropertyName) + getDataURL,"get","",false);
   Logger.log("Retrieved accounts from SFDC");
+  Logger.log(accounts);
 
   return accounts;
 
@@ -168,9 +190,12 @@ function createSheetForNewTerritory(e) {
   territoryMap.getRange(1,5).setValue("Days Since Last Meeting");
   territoryMap.getRange(1,6).setValue("License Count");
   territoryMap.getRange(1,7).setValue("Open Opportunity");
+  territoryMap.getRange(2,7).setValue("opp-Name");
   territoryMap.getRange(1,8).setValue("Opportunity Next Step");
+  territoryMap.getRange(2,8).setValue("opp-NextStep");
   territoryMap.getRange(1,9).setValue("Notes");
 
+  territoryMap.setColumnWidth(7,200);
   territoryMap.setColumnWidth(9,500);
   territoryMap.setColumnWidth(8,500);
   territoryMap.setColumnWidth(3, 160);

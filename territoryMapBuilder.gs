@@ -30,6 +30,19 @@ function goToTerritoryBuilder(e) {
       .addWidget(generateFieldsDropdown(sfdcAccountFields, 'revenue', 'Revenue', ''))
       .addWidget(generateFieldsDropdown(sfdcAccountFields, 'licenseCount', 'License Count', ''))
       .addWidget(generateFieldsDropdown(sfdcAccountFields, 'renewalDate', 'Renewal Date', '')));
+
+      builder.addSection(CardService.newCardSection()
+        .addWidget(CardService.newDecoratedText()
+        .setText("Include Open Opportunity")
+        .setBottomLabel("Column will show associated open opportunity.")
+        .setWrapText(true)
+        .setSwitchControl(CardService.newSwitch()
+            .setFieldName("include_open_opp_key")
+            .setValue("include_open_opp_value")
+            .setSelected(true)
+          )
+        )
+      )
     
       builder.addSection(CardService.newCardSection()
       .addWidget(CardService.newButtonSet()
