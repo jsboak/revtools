@@ -51,7 +51,12 @@ function addDataToNewTerritoryMap(territorySheet, e) {
     let accountScore = accounts.records[i][e.formInput.accountScore];
 
     var accountNameCell = territorySheet.getRange(rowCounter,1); //Set account name in first column
-    accountNameCell.setValue(accountName);
+    
+    var accountHyperLink = SpreadsheetApp.newRichTextValue()
+        .setText(accountName)
+        .setLinkUrl(userProperties.getProperty(baseURLPropertyName) + "/lightning/r/Account/" + accountId + "/view")
+        .build();
+    accountNameCell.setRichTextValue(accountHyperLink);
 
     var accountIdCell = territorySheet.getRange(rowCounter,26);
     accountIdCell.setValue(accountId);
@@ -75,7 +80,12 @@ function addDataToNewTerritoryMap(territorySheet, e) {
       
       var openOppCell = territorySheet.getRange(rowCounter,7);
       var openOppName = accounts.records[i].Opportunities.records[0].Name;
-      openOppCell.setValue(openOppName);
+      var oppHyperLink = SpreadsheetApp.newRichTextValue()
+        .setText(openOppName)
+        .setLinkUrl(userProperties.getProperty(baseURLPropertyName) + "/lightning/r/Opportunity/" + accounts.records[i].Opportunities.records[0].Id + "/view")
+        .build();
+
+      openOppCell.setRichTextValue(oppHyperLink);
 
       var openOppNextStepCell = territorySheet.getRange(rowCounter,8);
       var openOppNextStep = accounts.records[i].Opportunities.records[0].NextStep;
@@ -124,12 +134,11 @@ function retrieveAccountsOwnedByCurrentUser(e) {
     opp_query = `,+(SELECT+Opportunity.Id,+Opportunity.Name,+Opportunity.NextStep+FROM+Account.Opportunities+WHERE+IsClosed+=+FALSE+LIMIT+1)`;
   }
 
-  var soql = `SELECT+name+,+Id+,+${revenue}+,+${renewalDate}+,+${accountScore}${opp_query}+from+Account+WHERE+OwnerId='${currentSfdcUser}'`;
+  var soql = `SELECT+Name+,+Id+,+${revenue}+,+${renewalDate}+,+${accountScore}${opp_query}+from+Account+WHERE+OwnerId='${currentSfdcUser}'`;
   var getDataURL = '/services/data/v57.0/query/?q='+soql;
 
   var accounts = salesforceEntryPoint(userProperties.getProperty(baseURLPropertyName) + getDataURL,"get","",false);
   Logger.log("Retrieved accounts from SFDC");
-  Logger.log(accounts);
 
   return accounts;
 

@@ -55,9 +55,9 @@ function thresholdBuilder(e) {
     .setText("Highlight Territory Map Cell")
     .setWrapText(true)
     .setSwitchControl(CardService.newSwitch()
-        .setFieldName("form_input_switch_key")
+        .setFieldName("highlight-cell")
         .setSelected(true)
-        .setValue("form_input_switch_value")
+        .setValue("true")
       )
     )
   )
@@ -172,7 +172,6 @@ function addThresholdsToSheet(thresholdList) {
 
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds");
   
-  Logger.log("First empty row: " + getFirstEmptyRowByColumnArray())
   const emptyRow = getFirstEmptyRowByColumnArray("Configured Thresholds");
 
   for(i=0; i < thresholdList.length; i++) {
@@ -193,7 +192,9 @@ function addThresholdsToSheet(thresholdList) {
 }
 
 function getFirstEmptyRowByColumnArray(sheetName) {
+
   var spr = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(sheetName);
+
   var column = spr.getRange('A:A');
   var values = column.getValues(); // get all data in one call
   var ct = 0;

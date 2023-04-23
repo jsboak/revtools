@@ -53,6 +53,7 @@ function mapAccountIdRows() {
 function mapFieldIdColumns() {
 
   var territoryMap = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Territory Map");
+  
   var fieldIds = territoryMap.getDataRange();
 
   var fieldIdColumnMap = {}

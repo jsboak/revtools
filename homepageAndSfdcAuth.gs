@@ -55,6 +55,13 @@ function onHomepage(e) {
       .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.MULTIPLE_PEOPLE))
       .setWrapText(true)));
 
+    builder.addSection(CardService.newCardSection()
+    .addWidget(CardService.newDecoratedText()
+      .setText("Pull Updated Data from SFDC")
+      .setOnClickAction(CardService.newAction().setFunctionName('retrieveDataFromSfdc'))
+      .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.DOLLAR))
+      .setWrapText(true)));
+
     //TODO: potentially add a footer with a link to our website or support-docs
     // var fixedFooter =
     //   CardService
