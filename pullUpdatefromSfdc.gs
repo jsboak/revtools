@@ -1,3 +1,9 @@
+// function createScheduledSfdcPull(funcname) {
+//   if(ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() == funcname).length == 0) {
+//     Logger.log(ScriptApp.newTrigger(funcname).timeBased().everyHours(1).create());
+//   }
+// }
+
 function updateSheetFromSfdcPull() {
 
   var pulledSfdcData = JSON.parse(retrievePullDataFromSfdc());

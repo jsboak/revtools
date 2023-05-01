@@ -1,5 +1,5 @@
 function creatonedittrigger(funcname) {
-  if(ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() == funcname).length == 0) {
+  if(ScriptApp.getProjectTriggers().filter(t => t.getTriggerSourceId() == SpreadsheetApp.getActiveSpreadsheet().getId()).length == 0) {
     ScriptApp.newTrigger(funcname).forSpreadsheet(SpreadsheetApp.getActive()).onEdit().create();
   }
 }

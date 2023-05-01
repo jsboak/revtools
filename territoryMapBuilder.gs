@@ -18,18 +18,20 @@ function goToTerritoryBuilder(e) {
 
   var title = 'Territory Builder';
 
-
   if(isTokenValid()) {
 
     var sfdcAccountFields = getAccountFields();
 
     var builder = CardService.newCardBuilder()
       .setHeader(CardService.newCardHeader().setTitle(title))
-      .addSection(CardService.newCardSection()
-      .addWidget(generateFieldsDropdown(sfdcAccountFields, 'accountScore', 'Account Score', ''))
-      .addWidget(generateFieldsDropdown(sfdcAccountFields, 'revenue', 'Revenue', ''))
-      .addWidget(generateFieldsDropdown(sfdcAccountFields, 'licenseCount', 'License Count', ''))
-      .addWidget(generateFieldsDropdown(sfdcAccountFields, 'renewalDate', 'Renewal Date', '')));
+
+      builder.addSection(CardService.newCardSection().setHeader("Accounts Fields Selection")
+      .addWidget(CardService.newDecoratedText().setText("Select the desired fields for your Territory Map.").setWrapText(true).setIcon(CardService.Icon.DESCRIPTION))
+      )
+      builder.addSection(CardService.newCardSection()
+      .setCollapsible(true)
+      .addWidget(generateFieldsSelector(sfdcAccountFields, "sfdc_territory_fields", "")
+      ))
 
       builder.addSection(CardService.newCardSection()
         .addWidget(CardService.newDecoratedText()
@@ -78,14 +80,28 @@ function goToTerritoryBuilder(e) {
 
 }
 
+function generateFieldsSelector(sfdcAccountFields, fieldName, fieldTitle) {
+  var selectionInput = CardService.newSelectionInput().setTitle(fieldTitle)
+    .setFieldName(fieldName)
+    .setType(CardService.SelectionInputType.CHECK_BOX);
+
+  Object.keys(sfdcAccountFields).sort().
+    forEach((function(v, i) {
+      selectionInput.addItem(sfdcAccountFields[v].label, v, false);
+    }));
+
+  return selectionInput;
+}
+
 function generateFieldsDropdown(sfdcAccountFields, fieldName, fieldTitle) {
   var selectionInput = CardService.newSelectionInput().setTitle(fieldTitle)
     .setFieldName(fieldName)
     .setType(CardService.SelectionInputType.DROPDOWN);
 
-  sfdcAccountFields.forEach((field, array) => {
-    selectionInput.addItem(field.label, field.name, false);
-  })
+  Object.keys(sfdcAccountFields).sort().
+    forEach((function(v, i) {
+      selectionInput.addItem(sfdcAccountFields[v].label, v, false);
+    }));
 
   return selectionInput;
 }

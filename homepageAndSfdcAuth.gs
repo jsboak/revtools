@@ -46,7 +46,7 @@ function onHomepage(e) {
         .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.CLOCK))
         .setBottomLabel("Set reminders for yourself related to certain accounts.")
         .setWrapText(true))
-    )
+    );
 
     builder.addSection(CardService.newCardSection()
     .addWidget(CardService.newDecoratedText()
@@ -57,9 +57,17 @@ function onHomepage(e) {
 
     builder.addSection(CardService.newCardSection()
     .addWidget(CardService.newDecoratedText()
+      .setText("Test Function")
+      .setOnClickAction(CardService.newAction().setFunctionName('testFunction'))
+      .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.MULTIPLE_PEOPLE))
+      .setWrapText(true)));
+
+    builder.addSection(CardService.newCardSection()
+    .addWidget(CardService.newDecoratedText()
       .setText("Pull Updated Data from SFDC")
       .setOnClickAction(CardService.newAction().setFunctionName('updateSheetFromSfdcPull'))
-      .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.DOLLAR))
+      .setStartIcon(CardService.newIconImage().setIconUrl("https://upload.wikimedia.org/wikipedia/commons/8/89/Salesforce_Users_Email_list.png"))
+      .setEndIcon(CardService.newIconImage().setIconUrl("https://upload.wikimedia.org/wikipedia/commons/8/89/Salesforce_Users_Email_list.png"))
       .setWrapText(true)));
 
     //TODO: potentially add a footer with a link to our website or support-docs
