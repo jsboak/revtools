@@ -1,3 +1,18 @@
+/*
+New approach:
+For threshold checking, create JSON:
+  {
+    
+    ARR__c: {0018Y00002xtfWTQAY:1000,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:2500},
+    DaysSinceLastContacted__c:{0018Y00002xtfWTQAY:1000,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:2500},
+    DaysSinceOppUpdated__c: {0018Y00002xtfWTQAY:1000,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:2500}
+  }
+Save to UserProperties. This will mean that thresholds set on different sheets will get added to this map.
+On schedule, the ScriptApp will query salesforce for the fields (which are the Keys in the JSON) -> still use WHERE accounts owned by current user.
+Loop through the JSON keys, loop through the field keys+values (which are the account ids and their respective thresholds), 
+then check that value against the one from the Salesforce API response.
+*/
+
 var thresholdList = []
 
 function goToThresholdBuilder(e) {

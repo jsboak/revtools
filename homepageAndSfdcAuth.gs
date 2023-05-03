@@ -6,7 +6,13 @@ function onOpen(e) {
 
 }
 
+function testFunction() {
+  Logger.log(SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds").getDataRange().getValues());
+}
+
 function onHomepage(e) {
+
+  
     //This is for taskbar-menu items. We can explore using those later
     // SpreadsheetApp.getUi()
     //   .createMenu('My Menu')

@@ -1,6 +1,13 @@
-function creatonedittrigger(funcname) {
+function creatonedittrigger(functionName) {
+
+  try {
+    SpreadsheetApp.getActiveSpreadsheet().getName();
+  } catch(error) {
+    SpreadsheetApp.getActiveSpreadsheet().renameActiveSheet("Untitled spreadsheet");
+  }
+
   if(ScriptApp.getProjectTriggers().filter(t => t.getTriggerSourceId() == SpreadsheetApp.getActiveSpreadsheet().getId()).length == 0) {
-    ScriptApp.newTrigger(funcname).forSpreadsheet(SpreadsheetApp.getActive()).onEdit().create();
+    ScriptApp.newTrigger(functionName).forSpreadsheet(SpreadsheetApp.getActiveSpreadsheet()).onEdit().create();
   }
 }
 

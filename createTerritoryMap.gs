@@ -36,99 +36,95 @@ function addDataToNewTerritoryMap(territorySheet, e) {
   var accountNameMatrix = [];
   var accountIdMatrix = [];
 
-  for(let j=0; j < accounts.totalSize; j++) {
+  if (!e.formInput.include_open_opp_key) {
 
-    var accountRow = [];
-    var accountId = accounts.records[j].Id;
+    for(let j=0; j < accounts.totalSize; j++) {
 
-    var accountNameField = [SpreadsheetApp.newRichTextValue().setText(accounts.records[j].Name).
-      setLinkUrl(userProperties.getProperty(baseURLPropertyName) + "/lightning/r/Account/" + accountId + "/view").build()];
-    var accountIdField = [accountId];
+      var accountRow = [];
+      var accountId = accounts.records[j].Id;
 
-    for(i=0; i < numColumns; i++) {
+      var accountNameField = [SpreadsheetApp.newRichTextValue().setText(accounts.records[j].Name).
+        setLinkUrl(userProperties.getProperty(baseURLPropertyName) + "/lightning/r/Account/" + accountId + "/view").build()];
+      var accountIdField = [accountId];
 
-      var accountField = e.formInputs.sfdc_territory_fields[i];
-      if(accountField == "null") {
-        accountField = "";
-      }      
-      accountRow.push(accounts.records[j][accountField]);
+      for(i=0; i < numColumns; i++) {
+
+        var accountField = e.formInputs.sfdc_territory_fields[i];
+        if(accountField == "null") {
+          accountField = "";
+        }      
+        accountRow.push(accounts.records[j][accountField]);
+      }
+      accountNameMatrix.push(accountNameField);
+      accountIdMatrix.push(accountIdField);
+      territoryMatrix.push(accountRow)
+      
     }
-    accountNameMatrix.push(accountNameField);
-    accountIdMatrix.push(accountIdField);
-    territoryMatrix.push(accountRow)
+    territorySheet.getRange(3,2,accounts.totalSize, numColumns+1).setHorizontalAlignment("center");
+
+  } else {
+
+    var oppNameMap = []
+    var oppNextStepMap = [];
+    var oppIdMap = [];
+
+    for(let j=0; j < accounts.totalSize; j++) {
+
+      var accountRow = [];
+      var accountId = accounts.records[j].Id;
+
+      var accountNameField = [SpreadsheetApp.newRichTextValue().setText(accounts.records[j].Name).
+        setLinkUrl(userProperties.getProperty(baseURLPropertyName) + "/lightning/r/Account/" + accountId + "/view").build()];
+      var accountIdField = [accountId];
+
+      for(i=0; i < numColumns; i++) {
+
+        var accountField = e.formInputs.sfdc_territory_fields[i];
+        if(accountField == "null") {
+          accountField = "";
+        }      
+        accountRow.push(accounts.records[j][accountField]);
+      }
+      accountNameMatrix.push(accountNameField);
+      accountIdMatrix.push(accountIdField);
+      territoryMatrix.push(accountRow)
+      
+      if(accounts.records[j].Opportunities) {
+        var openOppName = accounts.records[j].Opportunities.records[0].Name;
+        var openOppNextStep = accounts.records[j].Opportunities.records[0].NextStep;
+        var openOppId = accounts.records[j].Opportunities.records[0].Id;
+        var oppHyperLink = SpreadsheetApp.newRichTextValue()
+          .setText(openOppName)
+          .setLinkUrl(userProperties.getProperty(baseURLPropertyName) + "/lightning/r/Opportunity/" + accounts.records[j].Opportunities.records[0].Id + "/view")
+          .build();
+        oppNameMap.push([oppHyperLink]);
+        oppNextStepMap.push([openOppNextStep]);
+        oppIdMap.push([openOppId]);
+      } else {
+        oppNameMap.push([SpreadsheetApp.newRichTextValue().setText("").build()]);
+        oppNextStepMap.push([""]);
+        oppIdMap.push([""]);
+      }
+    }
+
+    territorySheet.getRange(3,2,accounts.totalSize, numColumns+2).setHorizontalAlignment("center");
+    var oppMatrix = territorySheet.getRange(3,numColumns+2,accounts.totalSize,1);
+    oppMatrix.setRichTextValues(oppNameMap);
+    var oppNextStepMatrix = territorySheet.getRange(3,numColumns+3,accounts.totalSize,1);
+    oppNextStepMatrix.setValues(oppNextStepMap);
+    var oppIdMatrix = territorySheet.getRange(3,25,accounts.totalSize,1);
+    oppIdMatrix.setValues(oppIdMap);
   }
 
-  Logger.log(accountNameMatrix);
+  territoryMap.setValues(territoryMatrix);
   var accountNameMap = territorySheet.getRange(3,1,accounts.totalSize,1);
   accountNameMap.setRichTextValues(accountNameMatrix);
-
-  territorySheet.getRange(3,2,accounts.totalSize, numColumns+1).setHorizontalAlignment("center");
-  territoryMap.setValues(territoryMatrix);
 
   var accountIdMap = territorySheet.getRange(3,26,accounts.totalSize,1);
   accountIdMap.setValues(accountIdMatrix);
 
-  // territorySheet.autoResizeColumns(1,26);
+} 
 
-  //   let accountName = accounts.records[i].Name;
-  //   let accountId = accounts.records[i].Id;
-  //   let accountRevenue = accounts.records[i][e.formInput.revenue];
-  //   let accountScore = accounts.records[i][e.formInput.accountScore];
-  //   let renewalDate = new Date(accounts.records[i][e.formInput.renewalDate]);
-  //   const oneDay = 24 * 60 * 60 * 1000;
-  //   var today = new Date();
-  //   var daysToRenewal = Math.round((renewalDate - today) / oneDay);
-  //   if (daysToRenewal < 0) {
-  //     daysToRenewal = ""
-  //   }
-
-  //   var accountNameCell = territorySheet.getRange(rowCounter,1); //remove .getRange() calls from foor loop -> https://www.steegle.com/google-products/google-apps-script-faq
-    
-  //   var accountHyperLink = SpreadsheetApp.newRichTextValue()
-  //       .setText(accountName)
-  //       .setLinkUrl(userProperties.getProperty(baseURLPropertyName) + "/lightning/r/Account/" + accountId + "/view")
-  //       .build();
-  //   accountNameCell.setRichTextValue(accountHyperLink);
-
-  //   var accountIdCell = territorySheet.getRange(rowCounter,26); //remove .getRange() calls from foor loop -> https://www.steegle.com/google-products/google-apps-script-faq
-  //   accountIdCell.setValue(accountId);
-
-  //   var accountRevenueCell = territorySheet.getRange(rowCounter,2); //remove .getRange() calls from foor loop -> https://www.steegle.com/google-products/google-apps-script-faq
-  //   accountRevenueCell.setValue(accountRevenue);
-
-  //   var accountRenewalCell = territorySheet.getRange(rowCounter,3); //remove .getRange() calls from foor loop -> https://www.steegle.com/google-products/google-apps-script-faq
-  //   accountRenewalCell.setValue(daysToRenewal);
-
-  //   var accountRenewalCell = territorySheet.getRange(rowCounter,4); //remove .getRange() calls from foor loop -> https://www.steegle.com/google-products/google-apps-script-faq
-  //   accountRenewalCell.setValue(accountScore);
-
-  //   if(accounts.records[i].Opportunities) {
-
-  //     var openOppIdCell = territorySheet.getRange(rowCounter,25); //remove .getRange() calls from foor loop -> https://www.steegle.com/google-products/google-apps-script-faq
-  //     var openOppId = accounts.records[i].Opportunities.records[0].Id;
-  //     openOppIdCell.setValue(openOppId);
-      
-  //     var openOppCell = territorySheet.getRange(rowCounter,7); //remove .getRange() calls from foor loop -> https://www.steegle.com/google-products/google-apps-script-faq
-  //     var openOppName = accounts.records[i].Opportunities.records[0].Name;
-  //     var oppHyperLink = SpreadsheetApp.newRichTextValue()
-  //       .setText(openOppName)
-  //       .setLinkUrl(userProperties.getProperty(baseURLPropertyName) + "/lightning/r/Opportunity/" + accounts.records[i].Opportunities.records[0].Id + "/view")
-  //       .build();
-
-  //     openOppCell.setRichTextValue(oppHyperLink);
-
-  //     var openOppNextStepCell = territorySheet.getRange(rowCounter,8); //remove .getRange() calls from foor loop -> https://www.steegle.com/google-products/google-apps-script-faq
-  //     var openOppNextStep = accounts.records[i].Opportunities.records[0].NextStep;
-  //     openOppNextStepCell.setValue(openOppNextStep);
-
-  //   }
-
-  //   rowCounter++;
-
-  // }
-  
-  
-}
 
 var currentSfdcUser;
 
@@ -165,7 +161,6 @@ function retrieveAccountsOwnedByCurrentUser(e) {
     accountQuery = accountQuery + element + ",+"
   );
 
-  // var soql = `SELECT+Name+,+Id+,+${revenue}+,+${renewalDate}+,+${accountScore}${opp_query}+from+Account+WHERE+OwnerId='${currentSfdcUser}'`;
   accountQuery = accountQuery.substring(0, accountQuery.length-2) + `${oppQuery}` + `+from+Account+WHERE+OwnerId='${currentSfdcUser}'`;
   
   var getDataURL = '/services/data/v57.0/query/?q='+accountQuery;
@@ -224,7 +219,7 @@ function createSheetForNewTerritory(e) {
     headerRowLabels.push(["Opportunity Name"],["Opportunity Next Step"])
     headerRowIds.push(["opp-Name"],["opp-NextStep"])
 
-    territoryMap.setColumnWidths(1, numColumns+1, 200);
+    territoryMap.setColumnWidths(1, numColumns+3, 200);
 
   }
 
