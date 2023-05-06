@@ -2,16 +2,11 @@ function onInstall(){
   onOpen();
 }
 
-function onOpen(e) {
-
-}
-
 function testFunction() {
   Logger.log(SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds").getDataRange().getValues());
 }
 
 function onHomepage(e) {
-
   
     //This is for taskbar-menu items. We can explore using those later
     // SpreadsheetApp.getUi()
@@ -24,10 +19,9 @@ function onHomepage(e) {
     //   .addToUi();
 
   creatonedittrigger('logPush');
+  createUpdateSfdcPull();
 
   var builder = CardService.newCardBuilder();
-
-  Logger.log("Token valid: " + isTokenValid());
 
   if(isTokenValid()) {
 
@@ -61,12 +55,12 @@ function onHomepage(e) {
       .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.MULTIPLE_PEOPLE))
       .setWrapText(true)));
 
-    builder.addSection(CardService.newCardSection()
-    .addWidget(CardService.newDecoratedText()
-      .setText("Test Function")
-      .setOnClickAction(CardService.newAction().setFunctionName('testFunction'))
-      .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.MULTIPLE_PEOPLE))
-      .setWrapText(true)));
+    // builder.addSection(CardService.newCardSection()
+    // .addWidget(CardService.newDecoratedText()
+    //   .setText("Test Function")
+    //   .setOnClickAction(CardService.newAction().setFunctionName('testFunction'))
+    //   .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.MULTIPLE_PEOPLE))
+    //   .setWrapText(true)));
 
     builder.addSection(CardService.newCardSection()
     .addWidget(CardService.newDecoratedText()
@@ -99,7 +93,7 @@ function onHomepage(e) {
             .setOpenAs(CardService.OpenAs.OVERLAY))
         .setDisabled(false))));
 
-  }
+  } 
 
   return builder.build();
 }
@@ -203,21 +197,53 @@ function authTokenGETCheck(muteHttpExceptions) {
 
 function isTokenValid() {
 
-  if(!userProperties.getProperty(baseURLPropertyName)) {
+  if(!userProperties.getProperty(refreshTokenName)) {
 
-    Logger.log("Base URL: " + userProperties.getProperty(baseURLPropertyName))
+    //First time login?
+    Logger.log("Refresh token doesn't exist. User must connect or login.")
 
     return false;
   } else {
-      var getDataURL = userProperties.getProperty(baseURLPropertyName) + '/services/data/v57.0/query/?q=SELECT+name+from+Account+LIMIT+1';
-      var dataResponse = UrlFetchApp.fetch(getDataURL,authTokenGETCheck(true)); 
 
-      if(dataResponse.getResponseCode() === 200) {
+    Logger.log("Attempting to connect to SFDC.")
+    var getDataURL = userProperties.getProperty(baseURLPropertyName) + '/services/data/v57.0/query/?q=SELECT+name+from+Account+LIMIT+1';
+    var dataResponse = UrlFetchApp.fetch(getDataURL,authTokenGETCheck(true)); 
 
+    //We're logged in
+    if(dataResponse.getResponseCode() === 200) {
+
+      Logger.log("Active Oauth token. Connected to Salesforce.")
+      return true;
+      
+      //Need to use refresh token to get new Oauth token
+    } else {
+
+      Logger.log("Using refresh token to get new Oauth token.")
+
+      var refreshTokenUrl = userProperties.getProperty(baseURLPropertyName) + '/services/oauth2/token';
+
+      var options = {
+        'method':'post',
+        "headers" : {
+          "Accept" : "application/json",
+        },
+        "payload":'grant_type=refresh_token&client_id=' +CLIENT_ID+ '&client_secret=' + CLIENT_SECRET + '&refresh_token=' + userProperties.getProperty(refreshTokenName),
+        "muteHttpExceptions": true,
+      }
+
+      var refreshTokenResponse = JSON.parse(UrlFetchApp.fetch(refreshTokenUrl, options).getContentText());
+      Logger.log(refreshTokenResponse);
+      if(refreshTokenResponse.access_token) {
+        Logger.log("Successfully retrieved new access token.")
+        userProperties.setProperty("SALESFORCE_OAUTH_TOKEN", refreshTokenResponse.access_token);
         return true;
       } else {
+        
+        Logger.log("Unsuccessfully retrieved new Oauth Token. User must log in again.")
+
         return false;
       }
+    }
   }
 }
 
