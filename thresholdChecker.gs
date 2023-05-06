@@ -28,7 +28,6 @@ function buildThresholdList() {
       territoryMap.getCell(accountRowMap[accountId], fieldIdColumnMap[fieldId]).setBackground("red");
 
     };
-
   }
 }
 

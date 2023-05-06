@@ -31,7 +31,7 @@ function logPush(e) {
         var patchPayload = {}
         patchPayload[sfdcFieldId] =  e.value ? e.value : "";
 
-        Logger.log(SFDChttpRequest(updateAccountURL, "patch", JSON.stringify(patchPayload), false));
+        Logger.log(salesforceEntryPoint(updateAccountURL, "patch", JSON.stringify(patchPayload), false));
 
       } else {
           var accountRow = e.range.rowStart;
@@ -44,7 +44,7 @@ function logPush(e) {
 
           Logger.log("Pushing update to Account");
 
-          Logger.log(SFDChttpRequest(updateAccountURL, "patch", JSON.stringify(patchPayload), false));
+          Logger.log(salesforceEntryPoint(updateAccountURL, "patch", JSON.stringify(patchPayload), false));
         }
       }
   } else {

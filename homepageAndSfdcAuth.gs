@@ -110,19 +110,19 @@ function doGet(e) {
 }
 
 ////oAuth related code
-function salesforceEntryPoint(URL,method, payload, muteHttpExceptions){
-  if(isTokenValid()){
+// function salesforceEntryPoint(URL,method, payload, muteHttpExceptions){
+//   if(isTokenValid()){
 
-    return SFDChttpRequest(URL, method, payload, muteHttpExceptions);
-  }
-  else {//we are starting from scratch or resetting
-    HTMLToOutput = "<html><h1>You need to login</h1><a href='"+getURLForAuthorization()+"'target='_blank'>Click here to start</a><br>Refresh this page when you return.</html>";
-    SpreadsheetApp.getActiveSpreadsheet().show(HtmlService.createHtmlOutput(HTMLToOutput));
-    return;
-  }
-}
+//     return SFDChttpRequest(URL, method, payload, muteHttpExceptions);
+//   }
+//   else {//we are starting from scratch or resetting
+//     HTMLToOutput = "<html><h1>You need to login</h1><a href='"+getURLForAuthorization()+"'target='_blank'>Click here to start</a><br>Refresh this page when you return.</html>";
+//     SpreadsheetApp.getActiveSpreadsheet().show(HtmlService.createHtmlOutput(HTMLToOutput));
+//     return;
+//   }
+// }
 
-function SFDChttpRequest(url, requestMethod, payload, muteHttpExceptions){
+function salesforceEntryPoint(url, requestMethod, payload, muteHttpExceptions){
 
   var token = userProperties.getProperty(tokenPropertyName);
   var requestDetails = {
@@ -232,7 +232,7 @@ function isTokenValid() {
       }
 
       var refreshTokenResponse = JSON.parse(UrlFetchApp.fetch(refreshTokenUrl, options).getContentText());
-      Logger.log(refreshTokenResponse);
+
       if(refreshTokenResponse.access_token) {
         Logger.log("Successfully retrieved new access token.")
         userProperties.setProperty("SALESFORCE_OAUTH_TOKEN", refreshTokenResponse.access_token);

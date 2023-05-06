@@ -100,7 +100,7 @@ function retrievePullDataFromSfdc() {
   var sfdcData = salesforceEntryPoint(userProperties.getProperty(baseURLPropertyName) + getDataURL,"get","",false);
 
   Logger.log("Retrieved pull-data from SFDC");
-  Logger.log(sfdcData);
+
   return sfdcData;
 
 }

@@ -1,20 +1,3 @@
-/*
-New approach:
-For threshold checking, create JSON:
-  {
-    
-    ARR__c: {0018Y00002xtfWTQAY:1000,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:2500},
-    DaysSinceLastContacted__c:{0018Y00002xtfWTQAY:1000,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:2500},
-    DaysSinceOppUpdated__c: {0018Y00002xtfWTQAY:1000,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:2500}
-  }
-Save to UserProperties. This will mean that thresholds set on different sheets will get added to this map.
-On schedule, the ScriptApp will query salesforce for the fields (which are the Keys in the JSON) -> still use WHERE accounts owned by current user.
-Loop through the JSON keys, loop through the field keys+values (which are the account ids and their respective thresholds), 
-then check that value against the one from the Salesforce API response.
-*/
-
-var thresholdList = []
-
 function goToThresholdBuilder(e) {
     try {       
           let nav = CardService.newNavigation().pushCard(thresholdBuilder(e));
@@ -88,13 +71,49 @@ function thresholdBuilder(e) {
   return builder.build();
 
 }
+/*
+New approach:
+For threshold checking, create JSON:
+  {
+    
+    ARR__c: {0018Y00002xtfWTQAY:1000,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:2500},
+    DaysSinceLastContacted__c:{0018Y00002xtfWTQAY:1000,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:2500},
+    DaysSinceOppUpdated__c: {0018Y00002xtfWTQAY:1000,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:2500}
+  }
+Save to UserProperties. This will mean that thresholds set on different sheets will get added to this map.
+On schedule, the ScriptApp will query salesforce for the fields (which are the Keys in the JSON) -> still use WHERE accounts owned by current user.
+Loop through the JSON keys, loop through the field keys+values (which are the account ids and their respective thresholds), 
+then check that value against the one from the Salesforce API response.
+*/
+
+var thresholdList = []
+
+function getThresholdProperty() {
+
+  if(userProperties.getProperty("thresholdJson")) {
+
+    // Logger.log("Property exists: " + userProperties.getProperty("thresholdJson"));
+    return JSON.parse(userProperties.getProperty("thresholdJson"));
+  } else {
+
+    return {};
+  }
+}
 
 function setThreshold(e) {
 
-  Logger.log(e);
+  var activeSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  if(activeSheet.getName() == "Territory Map") {
+    var rangeList = activeSheet.getActiveRangeList().getRanges();
+  } else {
+    return CardService.newActionResponseBuilder()
+      .setNotification(CardService.newNotification()
+      .setText("Please navigate to Territory Map sheet to configure thresholds."))
+      .build();
+  }
 
-  var rangeList = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet().getActiveRangeList().getRanges();
   var sheet = SpreadsheetApp.getActiveSheet();
+  var thresholdJson = getThresholdProperty();
 
   for (let i = 0; i < rangeList.length; i++) {
 
@@ -102,15 +121,22 @@ function setThreshold(e) {
 
     for (let j = 0; j < range.getValues().length; j++) {
 
-      Logger.log(range.getCell(j+1,1).getA1Notation());
-
-      // thresholdList.push({"Cell":range.getCell(j+1,1).getA1Notation()})
       var row = range.getCell(j+1,1).getRow();
       var column = range.getCell(j+1,1).getColumn();
       var accountId = sheet.getRange(row,26).getValue();
       var accountName = sheet.getRange(row,1).getValue();
       var fieldName = sheet.getRange(1,column).getValue();
       var fieldId = sheet.getRange(2,column).getValue();
+
+      if(thresholdJson[fieldId]) {
+
+        thresholdJson[fieldId][accountId] = e.formInput.thresholdValue;
+
+      } else {
+        thresholdJson[fieldId] = {};
+        thresholdJson[fieldId][accountId] = e.formInput.thresholdValue;
+      }
+      
       thresholdList.push({
         "Account":accountName, 
         "SFDCID":accountId, 
@@ -121,11 +147,19 @@ function setThreshold(e) {
         "notificationMethod":e.formInput.notificationMethod,
         "thresholdDescription":e.formInput.thresholdDescription
         })
-
     }
   }
 
+  userProperties.setProperty("thresholdJson", JSON.stringify(thresholdJson));
+  Logger.log(JSON.parse(userProperties.getProperty("thresholdJson")));
+
   createThresholdMap();
+
+  return CardService.newActionResponseBuilder()
+    .setNotification(CardService.newNotification()
+    .setText("Thresholds have been configured."))
+    .setNavigation(CardService.newNavigation().popToRoot())
+    .build();
 }
 
 function createThresholdMap() {
