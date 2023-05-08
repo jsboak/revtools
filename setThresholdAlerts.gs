@@ -71,20 +71,6 @@ function thresholdBuilder(e) {
   return builder.build();
 
 }
-/*
-New approach:
-For threshold checking, create JSON:
-  {
-    
-    ARR__c: {0018Y00002xtfWTQAY:1000,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:2500},
-    DaysSinceLastContacted__c:{0018Y00002xtfWTQAY:1000,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:2500},
-    DaysSinceOppUpdated__c: {0018Y00002xtfWTQAY:1000,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:1500,0018Y00002xtfWTQAY:2500}
-  }
-Save to UserProperties. This will mean that thresholds set on different sheets will get added to this map.
-On schedule, the ScriptApp will query salesforce for the fields (which are the Keys in the JSON) -> still use WHERE accounts owned by current user.
-Loop through the JSON keys, loop through the field keys+values (which are the account ids and their respective thresholds), 
-then check that value against the one from the Salesforce API response.
-*/
 
 var thresholdList = []
 
@@ -98,6 +84,10 @@ function getThresholdProperty() {
 
     return {};
   }
+}
+
+function deleteThresholdJson() {
+  userProperties.deleteProperty("thresholdJson");
 }
 
 function setThreshold(e) {
@@ -130,11 +120,23 @@ function setThreshold(e) {
 
       if(thresholdJson[fieldId]) {
 
-        thresholdJson[fieldId][accountId] = e.formInput.thresholdValue;
+        thresholdJson[fieldId][accountId] = {"Account":accountName, 
+          "fieldName":fieldName, 
+          "thresholdInequality":e.formInput.thresholdInequality,
+          "thresholdValue":e.formInput.thresholdValue,
+          "notificationMethod":e.formInput.notificationMethod,
+          "thresholdDescription":e.formInput.thresholdDescription
+        };
 
       } else {
         thresholdJson[fieldId] = {};
-        thresholdJson[fieldId][accountId] = e.formInput.thresholdValue;
+        thresholdJson[fieldId][accountId] = {"Account":accountName, 
+          "fieldName":fieldName, 
+          "thresholdInequality":e.formInput.thresholdInequality,
+          "thresholdValue":e.formInput.thresholdValue,
+          "notificationMethod":e.formInput.notificationMethod,
+          "thresholdDescription":e.formInput.thresholdDescription
+        }
       }
       
       thresholdList.push({
@@ -188,21 +190,12 @@ function createThresholdMap() {
     thresholdSheet.getRange("A1:Z1000").setVerticalAlignment("middle");
 
     //Add the columns to header row
-    thresholdSheet.getRange(1,1).setValue("Account Name");
+    thresholdMap = thresholdSheet.getRange(1,1,1,7)
+    thresholdMapMatrix = [["Account Name", "Configured Field", "Current Value", "Threshold Conditional","Threshold Metric","Notification Method","Threshold Description"]]
+    thresholdMap.setValues(thresholdMapMatrix)
+    // thresholdSheet.getRange(1,1).setValue("Account Name");
 
     thresholdSheet.setFrozenRows(1); //Freeze the top row (header row)
-
-    thresholdSheet.getRange(1,2).setValue("Configured Field")
-
-    thresholdSheet.getRange(1,3).setValue("Current Value");
-
-    thresholdSheet.getRange(1,4).setValue("Threshold Conditional")
-
-    thresholdSheet.getRange(1,5).setValue("Threshold Metric")
-
-    thresholdSheet.getRange(1,6).setValue("Notification Method")
-
-    thresholdSheet.getRange(1,7).setValue("Threshold Description")
 
     thresholdSheet.getRange(1,25).setValue("Configured Field ID")
     thresholdSheet.getRange(1,26).setValue("Account ID")
@@ -217,24 +210,71 @@ function createThresholdMap() {
 
 }
 
-function addThresholdsToSheet(thresholdList) {
+/*
+New approach:
+For threshold checking, create JSON:
+{
+  NumberOfEmployees={
+    0018Y00002xtfWWQAY={thresholdInequality=Less Than, Account=Rapid API, fieldName=Employees, thresholdValue=1234567890, notificationMethod=E-mail}, 
+    0018Y00002xtfWTQAY={notificationMethod=E-mail, thresholdInequality=Less Than, Account=Grafana Labs, thresholdValue=1234567890, fieldName=Employees}, 
+    0018Y00002xtfWVQAY={fieldName=Employees, Account=Snyk.io, notificationMethod=E-mail, thresholdInequality=Less Than, thresholdValue=1234567890}, 
+    0018Y00002xtfWUQAY={Account=MongoDB, fieldName=Employees, thresholdInequality=Less Than, notificationMethod=E-mail, thresholdValue=1234567890}
+}, 
+  ARR__c={
+    0018Y00002xtfWXQAY={thresholdInequality=Greater Than, thresholdValue=123456789, fieldName=ARR, Account=Notion, notificationMethod=E-mail}, 
+    0018Y00002xtfWYQAY={thresholdValue=123456789, thresholdInequality=Greater Than, fieldName=ARR, notificationMethod=E-mail, Account=Plaid}, 
+    0018Y00002xtfWZQAY={thresholdValue=123456789, thresholdInequality=Greater Than, fieldName=ARR, notificationMethod=E-mail, Account=Calendly}, 
+    0018Y00002xtfWWQAY={Account=Rapid API, thresholdValue=123456789, fieldName=ARR, thresholdInequality=Greater Than, notificationMethod=E-mail}
+  }
+}
+Save to UserProperties. This will mean that thresholds set on different sheets will get added to this map.
+On schedule, the ScriptApp will query salesforce for the fields (which are the Keys in the JSON) -> still use WHERE accounts owned by current user.
+Loop through the JSON keys, loop through the field keys+values (which are the account ids and their respective thresholds), 
+then check that value against the one from the Salesforce API response.
+*/
+
+function addThresholdsToSheet() {
 
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds");
-  
-  const emptyRow = getFirstEmptyRowByColumnArray("Configured Thresholds");
+  var thresholdJson = JSON.parse(userProperties.getProperty("thresholdJson"));
+  var thresholdMatrix = []
+  var numRows=0;
 
-  for(i=0; i < thresholdList.length; i++) {
+  for (var sfdcField of Object.keys(thresholdJson)) {
 
-    sheet.getRange(emptyRow+i, 1).setValue(thresholdList[i].Account);
-    sheet.getRange(emptyRow+i,26).setValue(thresholdList[i].SFDCID);
-    sheet.getRange(emptyRow+i,2).setValue(thresholdList[i].fieldName);
-    sheet.getRange(emptyRow+i,25).setValue(thresholdList[i].fieldId)
-    sheet.getRange(emptyRow+i,4).setValue(thresholdList[i].thresholdInequality)
-    sheet.getRange(emptyRow+i,5).setValue(thresholdList[i].thresholdValue)
-    sheet.getRange(emptyRow+i,6).setValue(thresholdList[i].notificationMethod)
-    sheet.getRange(emptyRow+i,7).setValue(thresholdList[i].thresholdDescription)
+    for (var sfdcAccountId of Object.keys(thresholdJson[sfdcField])) {
+
+      var accountRow = [
+        thresholdJson[sfdcField][sfdcAccountId]["Account"],
+        thresholdJson[sfdcField][sfdcAccountId]["fieldName"],
+        "Current Value",
+        thresholdJson[sfdcField][sfdcAccountId]["thresholdInequality"],
+        thresholdJson[sfdcField][sfdcAccountId]["thresholdValue"],
+        thresholdJson[sfdcField][sfdcAccountId]["notificationMethod"],
+        thresholdJson[sfdcField][sfdcAccountId]["thresholdDescription"]];
+      thresholdMatrix.push(accountRow)
+      numRows++;
+
+      Logger.log(accountRow);
+
+    }
 
   }
+  sheet.getRange(2,1,numRows,7).setValues(thresholdMatrix);
+
+
+  // for(i=0; i < thresholdList.length; i++) {
+
+  //   sheet.getRange(emptyRow+i, 1).setValue(thresholdList[i].Account);
+  //   sheet.getRange(emptyRow+i,26).setValue(thresholdList[i].SFDCID);
+  //   sheet.getRange(emptyRow+i,2).setValue(thresholdList[i].fieldName);
+  //   sheet.getRange(emptyRow+i,25).setValue(thresholdList[i].fieldId)
+  //   sheet.getRange(emptyRow+i,4).setValue(thresholdList[i].thresholdInequality)
+  //   sheet.getRange(emptyRow+i,5).setValue(thresholdList[i].thresholdValue)
+  //   sheet.getRange(emptyRow+i,6).setValue(thresholdList[i].notificationMethod)
+  //   sheet.getRange(emptyRow+i,7).setValue(thresholdList[i].thresholdDescription)
+
+  // }
 
   SpreadsheetApp.setActiveSheet(SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds"));
 
