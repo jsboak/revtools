@@ -103,6 +103,8 @@ function setThreshold(e) {
   }
 
   var sheet = SpreadsheetApp.getActiveSheet();
+  var sheetValues = sheet.getDataRange().getValues();
+
   var thresholdJson = getThresholdProperty();
 
   for (let i = 0; i < rangeList.length; i++) {
@@ -110,13 +112,15 @@ function setThreshold(e) {
     var range = rangeList[i]
 
     for (let j = 0; j < range.getValues().length; j++) {
-
+      
       var row = range.getCell(j+1,1).getRow();
       var column = range.getCell(j+1,1).getColumn();
-      var accountId = sheet.getRange(row,26).getValue();
-      var accountName = sheet.getRange(row,1).getValue();
-      var fieldName = sheet.getRange(1,column).getValue();
-      var fieldId = sheet.getRange(2,column).getValue();
+
+      var accountId = sheetValues[[row-1]][25];
+      var accountName = sheetValues[[row-1]][0];
+      var fieldName = sheetValues[[0]][column-1];
+      var fieldId = sheetValues[[1]][column-1];
+      var currentValue = sheetValues[[row-1]][column-1];
 
       if(thresholdJson[fieldId]) {
 
@@ -125,7 +129,8 @@ function setThreshold(e) {
           "thresholdInequality":e.formInput.thresholdInequality,
           "thresholdValue":e.formInput.thresholdValue,
           "notificationMethod":e.formInput.notificationMethod,
-          "thresholdDescription":e.formInput.thresholdDescription
+          "thresholdDescription":e.formInput.thresholdDescription,
+          "currentValue":currentValue
         };
 
       } else {
@@ -135,7 +140,8 @@ function setThreshold(e) {
           "thresholdInequality":e.formInput.thresholdInequality,
           "thresholdValue":e.formInput.thresholdValue,
           "notificationMethod":e.formInput.notificationMethod,
-          "thresholdDescription":e.formInput.thresholdDescription
+          "thresholdDescription":e.formInput.thresholdDescription,
+          "currentValue":currentValue
         }
       }
       
@@ -153,7 +159,7 @@ function setThreshold(e) {
   }
 
   userProperties.setProperty("thresholdJson", JSON.stringify(thresholdJson));
-  Logger.log(JSON.parse(userProperties.getProperty("thresholdJson")));
+  // Logger.log(JSON.parse(userProperties.getProperty("thresholdJson")));
 
   createThresholdMap();
 
@@ -179,7 +185,6 @@ function createThresholdMap() {
     thresholdSheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet();
     thresholdSheet.setName("Configured Thresholds");
     //Formatting
-     //Set all cells to use WRAP of text
 
     var bold = SpreadsheetApp.newTextStyle().setBold(true).build();
     thresholdSheet.getRange("A1:1").setHorizontalAlignment("center").setTextStyle(bold); //Center text and bold text in top row
@@ -204,6 +209,7 @@ function createThresholdMap() {
     thresholdSheet.setFrozenColumns(1);
     thresholdSheet.getRange("A2:Z1000").setWrapStrategy(SpreadsheetApp.WrapStrategy.WRAP);
 
+    Logger.log("Created Threshold Sheet");
   }
 
   addThresholdsToSheet(thresholdList);
@@ -235,9 +241,12 @@ then check that value against the one from the Salesforce API response.
 
 function addThresholdsToSheet() {
 
+  Logger.log("Adding Thresholds to sheet");
+
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds");
   var thresholdJson = JSON.parse(userProperties.getProperty("thresholdJson"));
   var thresholdMatrix = []
+  var fieldIdMatrix = []
   var numRows=0;
 
   for (var sfdcField of Object.keys(thresholdJson)) {
@@ -247,34 +256,23 @@ function addThresholdsToSheet() {
       var accountRow = [
         thresholdJson[sfdcField][sfdcAccountId]["Account"],
         thresholdJson[sfdcField][sfdcAccountId]["fieldName"],
-        "Current Value",
+        thresholdJson[sfdcField][sfdcAccountId]["currentValue"],
         thresholdJson[sfdcField][sfdcAccountId]["thresholdInequality"],
         thresholdJson[sfdcField][sfdcAccountId]["thresholdValue"],
         thresholdJson[sfdcField][sfdcAccountId]["notificationMethod"],
         thresholdJson[sfdcField][sfdcAccountId]["thresholdDescription"]];
       thresholdMatrix.push(accountRow)
-      numRows++;
 
-      Logger.log(accountRow);
+      var fieldRow = [[sfdcField],[sfdcAccountId]]
+      fieldIdMatrix.push(fieldRow);
+      numRows++;
 
     }
 
   }
+  Logger.log("Placing threshold values into sheet");
   sheet.getRange(2,1,numRows,7).setValues(thresholdMatrix);
-
-
-  // for(i=0; i < thresholdList.length; i++) {
-
-  //   sheet.getRange(emptyRow+i, 1).setValue(thresholdList[i].Account);
-  //   sheet.getRange(emptyRow+i,26).setValue(thresholdList[i].SFDCID);
-  //   sheet.getRange(emptyRow+i,2).setValue(thresholdList[i].fieldName);
-  //   sheet.getRange(emptyRow+i,25).setValue(thresholdList[i].fieldId)
-  //   sheet.getRange(emptyRow+i,4).setValue(thresholdList[i].thresholdInequality)
-  //   sheet.getRange(emptyRow+i,5).setValue(thresholdList[i].thresholdValue)
-  //   sheet.getRange(emptyRow+i,6).setValue(thresholdList[i].notificationMethod)
-  //   sheet.getRange(emptyRow+i,7).setValue(thresholdList[i].thresholdDescription)
-
-  // }
+  sheet.getRange(2,25,numRows,2).setValues(fieldIdMatrix);
 
   SpreadsheetApp.setActiveSheet(SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds"));
 
