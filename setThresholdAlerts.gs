@@ -72,8 +72,6 @@ function thresholdBuilder(e) {
 
 }
 
-var thresholdList = []
-
 function getThresholdProperty() {
 
   if(userProperties.getProperty("thresholdJson")) {
@@ -102,9 +100,8 @@ function setThreshold(e) {
       .build();
   }
 
-  var sheet = SpreadsheetApp.getActiveSheet();
-  var sheetValues = sheet.getDataRange().getValues();
-
+  var sheetValues = activeSheet.getDataRange().getValues();
+  var lastRow = activeSheet.getDataRange().getLastRow();
   var thresholdJson = getThresholdProperty();
 
   for (let i = 0; i < rangeList.length; i++) {
@@ -114,47 +111,47 @@ function setThreshold(e) {
     for (let j = 0; j < range.getValues().length; j++) {
       
       var row = range.getCell(j+1,1).getRow();
+
+      if(row > lastRow) {
+        break;
+      } else if (row == 1.0 || row == 2.0) {
+        continue;
+      }
+
       var column = range.getCell(j+1,1).getColumn();
 
-      var accountId = sheetValues[[row-1]][25];
-      var accountName = sheetValues[[row-1]][0];
-      var fieldName = sheetValues[[0]][column-1];
-      var fieldId = sheetValues[[1]][column-1];
-      var currentValue = sheetValues[[row-1]][column-1];
+      try {
+        var accountId = sheetValues[[row-1]][25];
+        var accountName = sheetValues[[row-1]][0];
+        var fieldName = sheetValues[[0]][column-1];
+        var fieldId = sheetValues[[1]][column-1];
+        var currentValue = sheetValues[[row-1]][column-1];
 
-      if(thresholdJson[fieldId]) {
+        if(thresholdJson[fieldId]) {
 
-        thresholdJson[fieldId][accountId] = {"Account":accountName, 
-          "fieldName":fieldName, 
-          "thresholdInequality":e.formInput.thresholdInequality,
-          "thresholdValue":e.formInput.thresholdValue,
-          "notificationMethod":e.formInput.notificationMethod,
-          "thresholdDescription":e.formInput.thresholdDescription,
-          "currentValue":currentValue
-        };
+          thresholdJson[fieldId][accountId] = {"Account":accountName, 
+            "fieldName":fieldName, 
+            "thresholdInequality":e.formInput.thresholdInequality,
+            "thresholdValue":e.formInput.thresholdValue,
+            "notificationMethod":e.formInput.notificationMethod,
+            "thresholdDescription":e.formInput.thresholdDescription,
+            "currentValue":currentValue
+          };
 
-      } else {
-        thresholdJson[fieldId] = {};
-        thresholdJson[fieldId][accountId] = {"Account":accountName, 
-          "fieldName":fieldName, 
-          "thresholdInequality":e.formInput.thresholdInequality,
-          "thresholdValue":e.formInput.thresholdValue,
-          "notificationMethod":e.formInput.notificationMethod,
-          "thresholdDescription":e.formInput.thresholdDescription,
-          "currentValue":currentValue
+        } else {
+          thresholdJson[fieldId] = {};
+          thresholdJson[fieldId][accountId] = {"Account":accountName, 
+            "fieldName":fieldName, 
+            "thresholdInequality":e.formInput.thresholdInequality,
+            "thresholdValue":e.formInput.thresholdValue,
+            "notificationMethod":e.formInput.notificationMethod,
+            "thresholdDescription":e.formInput.thresholdDescription,
+            "currentValue":currentValue
+          }
         }
+      } catch(E) {
+        Logger.log(E);
       }
-      
-      thresholdList.push({
-        "Account":accountName, 
-        "SFDCID":accountId, 
-        "fieldName":fieldName, 
-        "fieldId":fieldId, 
-        "thresholdInequality":e.formInput.thresholdInequality,
-        "thresholdValue":e.formInput.thresholdValue,
-        "notificationMethod":e.formInput.notificationMethod,
-        "thresholdDescription":e.formInput.thresholdDescription
-        })
     }
   }
 
@@ -212,7 +209,7 @@ function createThresholdMap() {
     Logger.log("Created Threshold Sheet");
   }
 
-  addThresholdsToSheet(thresholdList);
+  addThresholdsToSheet();
 
 }
 
