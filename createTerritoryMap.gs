@@ -4,7 +4,8 @@ function createNewTerritoryMap(e) {
   if(territorySheet != null) {
     Logger.log("Territory map already exists - adding to existing map");
 
-    addDataToNewTerritoryMap(territorySheet, e); //Need to create new method for adding columns to existing sheet
+    addDataToNewTerritoryMap(territorySheet, e, true); //Need to create new method for adding columns to existing sheet
+    addColumnsToExistingTerritoryMap(territorySheet, e);
 
   } else {
 
@@ -12,7 +13,7 @@ function createNewTerritoryMap(e) {
 
     var territoryMapSheet = createSheetForNewTerritory(e);
 
-    addDataToNewTerritoryMap(territoryMapSheet, e);
+    addDataToNewTerritoryMap(territoryMapSheet, e, false);
 
     PropertiesService.getUserProperties().setProperty("territoryMapName", territoryMapSheet.getName());
 
@@ -24,15 +25,67 @@ function createNewTerritoryMap(e) {
     .setNavigation(CardService.newNavigation().popCard())
 
     .build();
+}
+
+function addColumnsToExistingTerritoryMap(territorySheet, e) {
+
+  var accountFields = getAccountFields();
+  var sheetArray = territorySheet.getDataRange().getValues();
+  var firstEmptyColumn = sheetArray[0].indexOf("") + 1; //Plus one because array index starts at zero but column numbers start at 1
+  var numberOfFields = e.formInputs.sfdc_territory_fields.length;
+
+  var columnMatrix = [];
+  territorySheet.setColumnWidths(firstEmptyColumn, numberOfFields+1, 200);
+  
+  var bold = SpreadsheetApp.newTextStyle().setBold(true).build();
+  var headerRows = territorySheet.getRange(1,firstEmptyColumn,2,numberOfFields).setHorizontalAlignment("center").setTextStyle(bold);
+
+  var headerRowLabels = [];
+  var headerRowIds = [];
+
+  for(i=0; i < numberOfFields; i++) {
+    var element = e.formInputs.sfdc_territory_fields[i];
+
+    // Logger.log(accountFields[element]);    
+    headerRowLabels.push(accountFields[element].label)
+    headerRowIds.push(element)
+  };
+
+  if(e.formInput.include_open_opp_key) {
+    
+    headerRows = territorySheet.getRange(1,firstEmptyColumn,2,numberOfFields+2).setHorizontalAlignment("center").setTextStyle(bold);
+
+    headerRowLabels.push(["Opportunity Name"],["Opportunity Next Step"])
+    headerRowIds.push(["opp-Name"],["opp-NextStep"])
+
+    territorySheet.setColumnWidths(1, numberOfFields+2, 200);
+
+  }
+
+  columnMatrix.push(headerRowLabels);
+  columnMatrix.push(headerRowIds);
+  headerRows.setValues(columnMatrix);
+
+  SpreadsheetApp.getActive().toast("Successfully added new fields to sheet.", "Update", "1.5");
 
 }
 
-function addDataToNewTerritoryMap(territorySheet, e) {
+function addDataToNewTerritoryMap(territorySheet, e, existing) {
 
   var territoryMatrix = [];
   var accounts = JSON.parse(retrieveAccountsOwnedByCurrentUser(e));
   var numColumns = e.formInputs.sfdc_territory_fields.length;
-  var territoryMap = territorySheet.getRange(3,2,accounts.totalSize,numColumns);
+
+  if(existing == false) {
+    var territoryMap = territorySheet.getRange(3,2,accounts.totalSize,numColumns);
+  } else {
+
+    var sheetArray = territorySheet.getDataRange().getValues();
+    var firstEmptyColumn = sheetArray[0].indexOf("") + 1; //Plus one because array index starts at zero but column numbers start at 1
+    Logger.log(firstEmptyColumn);
+    var territoryMap = territorySheet.getRange(3,firstEmptyColumn,accounts.totalSize,numColumns);
+  }
+  
   var accountNameMatrix = [];
   var accountIdMatrix = [];
 
@@ -116,7 +169,7 @@ function addDataToNewTerritoryMap(territorySheet, e) {
     oppIdMatrix.setValues(oppIdMap);
   }
 
-  territoryMap.setValues(territoryMatrix);
+  territoryMap.setValues(territoryMatrix).setHorizontalAlignment("center");
   var accountNameMap = territorySheet.getRange(3,1,accounts.totalSize,1);
   accountNameMap.setRichTextValues(accountNameMatrix);
 
@@ -142,7 +195,7 @@ function getCurrentSfdcUser() {
   // Jakes's userID
   // var currentSfdcUser = '0058Y00000CFhwsQAD'
 
-  // return currentSfdcUser;
+  return currentSfdcUser;
 }
 
 function retrieveAccountsOwnedByCurrentUser(e) {

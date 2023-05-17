@@ -1,8 +1,11 @@
 function getAccountFields() {
 
+ 
   var getAccountFieldsURL = "/services/data/v57.0/sobjects/Account/describe/";
-  var accountFields = salesforceEntryPoint(userProperties.getProperty(baseURLPropertyName) + getAccountFieldsURL,"get","",false);
+   if(isTokenValid()) {
 
+    var accountFields = salesforceEntryPoint(userProperties.getProperty(baseURLPropertyName) + getAccountFieldsURL,"get","",false);
+  }
   var parsedAccountFields = JSON.parse(accountFields);
 
   var fieldsList = {};
