@@ -4,8 +4,17 @@ function createNewTerritoryMap(e) {
   if(territorySheet != null) {
     Logger.log("Territory map already exists - adding to existing map");
 
-    addDataToNewTerritoryMap(territorySheet, e, true); //Need to create new method for adding columns to existing sheet
-    addColumnsToExistingTerritoryMap(territorySheet, e);
+    var sheetArray = territorySheet.getDataRange().getValues();
+    var firstEmptyHeader = sheetArray[0].indexOf("") + 1; //Plus one because array index starts at zero but column numbers start at 1
+    var firstEmptyFirstRow = sheetArray[2].indexOf("") + 1;
+    if(firstEmptyHeader > firstEmptyFirstRow) {
+      var firstEmptyColumn = firstEmptyHeader;
+    } else {
+      var firstEmptyColumn = firstEmptyFirstRow;
+    }
+
+    addDataToNewTerritoryMap(territorySheet, e, true, firstEmptyColumn); //Need to create new method for adding columns to existing sheet
+    addColumnsToExistingTerritoryMap(territorySheet, e, firstEmptyColumn);
 
   } else {
 
@@ -27,11 +36,17 @@ function createNewTerritoryMap(e) {
     .build();
 }
 
-function addColumnsToExistingTerritoryMap(territorySheet, e) {
+function addColumnsToExistingTerritoryMap(territorySheet, e, firstEmptyColumn) {
 
   var accountFields = getAccountFields();
-  var sheetArray = territorySheet.getDataRange().getValues();
-  var firstEmptyColumn = sheetArray[0].indexOf("") + 1; //Plus one because array index starts at zero but column numbers start at 1
+  // var sheetArray = territorySheet.getDataRange().getValues();
+  // var firstEmptyHeader = sheetArray[0].indexOf("") + 1; //Plus one because array index starts at zero but column numbers start at 1
+  // var firstEmptyFirstRow = sheetArray[2].indexOf("") + 1;
+  // if(firstEmptyHeader > firstEmptyFirstRow) {
+  //   var firstEmptyColumn = firstEmptyHeader;
+  // } else {
+  //   var firstEmptyColumn = firstEmptyFirstRow;
+  // }
   var numberOfFields = e.formInputs.sfdc_territory_fields.length;
 
   var columnMatrix = [];
@@ -70,7 +85,7 @@ function addColumnsToExistingTerritoryMap(territorySheet, e) {
 
 }
 
-function addDataToNewTerritoryMap(territorySheet, e, existing) {
+function addDataToNewTerritoryMap(territorySheet, e, existing, firstEmptyColumn) {
 
   var territoryMatrix = [];
   var accounts = JSON.parse(retrieveAccountsOwnedByCurrentUser(e));
@@ -80,9 +95,9 @@ function addDataToNewTerritoryMap(territorySheet, e, existing) {
     var territoryMap = territorySheet.getRange(3,2,accounts.totalSize,numColumns);
   } else {
 
-    var sheetArray = territorySheet.getDataRange().getValues();
-    var firstEmptyColumn = sheetArray[0].indexOf("") + 1; //Plus one because array index starts at zero but column numbers start at 1
-    Logger.log(firstEmptyColumn);
+    // var sheetArray = territorySheet.getDataRange().getValues();
+    // var firstEmptyColumn = sheetArray[0].indexOf("") + 1; //Plus one because array index starts at zero but column numbers start at 1
+    // Logger.log(firstEmptyColumn);
     var territoryMap = territorySheet.getRange(3,firstEmptyColumn,accounts.totalSize,numColumns);
   }
   

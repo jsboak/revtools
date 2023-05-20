@@ -96,7 +96,7 @@ function modifyThresholdsFromConfiguredThresholds() {
   var activeSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
 
   var sheetValues = activeSheet.getDataRange().getValues();
-  var thresholdJson = getThresholdProperty();
+  var thresholdJson = {};
 
   var configuredFieldColumn = sheetValues[0].indexOf("Configured Field");
   var thresholdConditionalColumn = sheetValues[0].indexOf("Threshold Conditional");
@@ -113,7 +113,7 @@ function modifyThresholdsFromConfiguredThresholds() {
     try {
       var fieldName = sheetValues[i][configuredFieldColumn];
       var thresholdConditional = sheetValues[i][thresholdConditionalColumn];
-      var thresholdMetric = sheetValues[i][thresholdMetricColumn];
+      var thresholdValue = sheetValues[i][thresholdMetricColumn];
       var notificationMethod = sheetValues[i][notificationColumn];
       var thresholdDescription = sheetValues[i][thresholdDescriptionColumn];
       var fieldId = sheetValues[i][fieldIdColumn];
@@ -122,23 +122,22 @@ function modifyThresholdsFromConfiguredThresholds() {
       var currentValue = sheetValues[i][currentValueColumn];
 
       if(thresholdJson[fieldId]) {
-
         thresholdJson[fieldId][accountId] = {"Account":accountName, 
           "fieldName":fieldName, 
           "thresholdInequality":thresholdConditional,
-          "thresholdValue":thresholdMetric,
+          "thresholdValue":thresholdValue,
           "notificationMethod":notificationMethod,
           "thresholdDescription":thresholdDescription,
           "currentValue":currentValue
-        };
+          };
       } else {
         thresholdJson[fieldId] = {};
         thresholdJson[fieldId][accountId] = {"Account":accountName, 
           "fieldName":fieldName, 
-          "thresholdInequality":e.formInput.thresholdInequality,
-          "thresholdValue":e.formInput.thresholdValue,
-          "notificationMethod":e.formInput.notificationMethod,
-          "thresholdDescription":e.formInput.thresholdDescription,
+          "thresholdInequality":thresholdConditional,
+          "thresholdValue":thresholdValue,
+          "notificationMethod":notificationMethod,
+          "thresholdDescription":thresholdDescription,
           "currentValue":currentValue
         }
       }
@@ -221,6 +220,9 @@ function addThresholdsFromTerritoryMap(e) {
   }
 
   userProperties.setProperty("thresholdJson", JSON.stringify(thresholdJson));
+  userProperties.setProperty("userEmail", SpreadsheetApp.getActiveSpreadsheet().getOwner().getEmail());
+  userProperties.setProperty("userName", SpreadsheetApp.getActiveSpreadsheet().getOwner().getUsername())
+  userProperties.setProperty("configThresholdsSheet", SpreadsheetApp.getActiveSpreadsheet().getUrl() + "#gid=" + activeSheet.getSheetId());
   // Logger.log(JSON.parse(userProperties.getProperty("thresholdJson")));
 
   updateThresholdMap();
@@ -230,6 +232,10 @@ function addThresholdsFromTerritoryMap(e) {
     .setText("Thresholds have been configured."))
     .setNavigation(CardService.newNavigation().popToRoot())
     .build();
+}
+
+function getUserName() {
+  Logger.log(userProperties.getProperty("userName"));
 }
 
 function updateThresholdMap() {

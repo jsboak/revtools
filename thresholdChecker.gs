@@ -18,12 +18,12 @@ thresholdJson DB Table:
 function getThresholdValuesFromSfdc() {
 
   //This will use the thresholdJson property to query SFDC to retrieve the current values of the SFDC fields
-  var thresholdTable = getThresholdProperty();
+  var thresholdJson = getThresholdProperty();
 
   var accountQuery = "SELECT+Id,+";
 
   //iterate over SFDC Fields from Threshold Table
-  for (const[sfdcField,accounts] of Object.entries(thresholdTable)) {
+  for (const[sfdcField,accounts] of Object.entries(thresholdJson)) {
 
       accountQuery = accountQuery + sfdcField + ",+";
 
@@ -36,35 +36,69 @@ function getThresholdValuesFromSfdc() {
   var getDataURL = '/services/data/v57.0/query/?q='+accountQuery;
 
   if(isTokenValid()) {
-    var sfdcData = salesforceEntryPoint(userProperties.getProperty(baseURLPropertyName) + getDataURL,"get","",false);
+    var sfdcData = JSON.parse(salesforceEntryPoint(userProperties.getProperty(baseURLPropertyName) + getDataURL,"get","",false));
   }
 
-  Logger.log(sfdcData);
+  checkThresholdValues(sfdcData, thresholdJson);
 
 }
 
-function checkThresholdValues() {
+function findIndexByKey(list, key, value) {
+  return list.findIndex(obj => obj[key] === value);
+}
 
-  /*
-  This will be used to check whether the current values from SFDC have crossed the threshold inequality
-  If the threshold is crossed by the current value, then the date that the threshold was cross needs to get added to the
-  thresholdJson DB table:
+function checkThresholdValues(sfdcData, thresholdJson) {
 
   var today = new Date();
   var dd = String(today.getDate()).padStart(2, '0');
   var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
   var yyyy = today.getFullYear();
   today = mm + '/' + dd + '/' + yyyy;
+  var accountsInEmailBody = '';
 
-  thresholdJson[sfdcField][sfdcAccountId]["thresholdCrossedOn"] = today;
+  for (const[sfdcField,accounts] of Object.entries(thresholdJson)) {
 
-  If a notification method was set for this sfdcField[sfdcAccountId], then the notification needs to be sent.
-  */
+    for (const[accountId,thresholds] of Object.entries(accounts)) {
+
+      var index = findIndexByKey(sfdcData.records, "Id", accountId);
+      var currentValue = sfdcData.records[index][sfdcField];
+      var inequality = thresholds.thresholdInequality;
+      var thresholdValue = thresholds.thresholdValue;
+
+      if( (inequality == "Less Than" && currentValue < thresholdValue) || 
+        (inequality == "Greater Than" && currentValue > thresholdValue) || 
+        (inequality == "Equal To" && currentValue == thresholdValue)) {
+
+        thresholdJson[sfdcField][accountId]["thresholdCrossedOn"] = today;
+
+        if(thresholdJson[sfdcField][accountId]["notificationMethod"] == "E-mail") {
+
+          accountsInEmailBody+= "Account: " + thresholds.Account + " Field: " + sfdcField + " Current Value " + currentValue + " Threshold = " + inequality + " " + thresholdValue + "{{newline}}";
+
+        }
+      }
+    }
+  }
+
+  // Logger.log(thresholdJson)
+  if (accountsInEmailBody != '') {
+    sendEmail(accountsInEmailBody);
+  }
 
 }
 
-function sendEmail() {
+function sendEmail(accountsInEmailBody) {
 
+  Logger.log("Accounts: " + accountsInEmailBody)
+
+  const template = HtmlService.createTemplateFromFile('emailNotificationTemplate');
+  template.name = userProperties.getProperty("userName");
+  template.accountsInEmailBody = accountsInEmailBody;
+  template.territoryMapUrl = userProperties.getProperty("configThresholdsSheet");
+  const htmlBody = template.evaluate().getContent().replace(/{{newline}}/g, '<br>');
+
+  var emailOptions = {name: "RevTools.io", noReply:true, htmlBody: htmlBody}
+  MailApp.sendEmail(userProperties.getProperty("userEmail") ,"RevTools: Thresholds Crossed for Accounts", "", emailOptions)
   //This function will be used to send an email to the user when the threshold is crossed
 
 }
@@ -85,7 +119,6 @@ function buildThresholdList() {
     var fieldId = thresholds.getCell(j+1,25).getValue();
 
     var currentValue = territoryMap.getCell(accountRowMap[accountId], fieldIdColumnMap[fieldId]).getValue();
-    Logger.log("Current value for " + accountId + " at " + fieldId + " is: " + currentValue);
 
     thresholds.getCell(j+1,3).setValue(currentValue); //TODO: move away from hardcoded column value
 
