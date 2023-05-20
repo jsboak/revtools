@@ -65,23 +65,25 @@ function logPush(e) {
               SpreadsheetApp.getActive().toast("Couldn't update Salesforce. Check authentication.", "Update", "5");
             }
           }
+        } else {
+
+          Logger.log("Only one field-update can be pushsed to Salesforce at a time.")
+          
+          SpreadsheetApp.getActive().toast("Only one field-update can be pushsed to Salesforce at a time.", "Tip!", "5"); 
+
+          updateSheetFromSfdcPull();
         }
 
-      updateSheetFromSfdcPull();
-       
     } else {
-
-      updateSheetFromSfdcPull();
-      SpreadsheetApp.getActive().toast("Only one field-update can be pushsed to Salesforce at a time.", "Tip!", "5"); 
-    }
+      SpreadsheetApp.getActive().toast("Couldn't update Salesforce. Check authentication.", "Update", "5");
+    } 
     
   } else if (changeSourceSheet == "Configured Thresholds") { 
 
       Logger.log("Changed Thresholds: " + JSON.stringify(e));
       modifyThresholdsFromConfiguredThresholds();
-
   }
-  
+
 }
 
 
