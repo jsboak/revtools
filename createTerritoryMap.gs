@@ -198,6 +198,7 @@ var currentSfdcUser;
 
 function getCurrentSfdcUser() {
   Logger.log("Retrieving currently logged in user");
+
   var currentSfdcUserRequest = salesforceEntryPoint("https://login.salesforce.com/services/oauth2/userinfo","get","",false);
 
   var currentSFDCUserResponse = JSON.parse(currentSfdcUserRequest);

@@ -36,24 +36,17 @@ function onHomepage(e) {
     builder.addSection(CardService.newCardSection()
       .setHeader("Actions")
       .addWidget(CardService.newDecoratedText()
-        .setText("Configure Thresholds")
+        .setText("Thresholds & Alerts")
         .setOnClickAction(CardService.newAction().setFunctionName('goToThresholdBuilder'))
         .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.PHONE))
         .setBottomLabel("Get notified when specified fields match desired criteria.")
         .setWrapText(true))
-      .addWidget(CardService.newDecoratedText()
-        .setText("Set Reminder")
-        .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.CLOCK))
-        .setBottomLabel("Set reminders for yourself related to certain accounts.")
-        .setWrapText(true))
+      // .addWidget(CardService.newDecoratedText()
+      //   .setText("Set Reminder")
+      //   .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.CLOCK))
+      //   .setBottomLabel("Set reminders for yourself related to certain accounts.")
+      //   .setWrapText(true))
     );
-
-    builder.addSection(CardService.newCardSection()
-    .addWidget(CardService.newDecoratedText()
-      .setText("Test Thresholds")
-      .setOnClickAction(CardService.newAction().setFunctionName('buildThresholdList'))
-      .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.MULTIPLE_PEOPLE))
-      .setWrapText(true)));
 
     // builder.addSection(CardService.newCardSection()
     // .addWidget(CardService.newDecoratedText()
@@ -136,7 +129,8 @@ function salesforceEntryPoint(url, requestMethod, payload, muteHttpExceptions){
     }
   };
 
-  var request = UrlFetchApp.fetch(url,requestDetails);
+    var request = UrlFetchApp.fetch(url,requestDetails);
+
   // Logger.log("SFDC Response: " + request);
   return request;
 }

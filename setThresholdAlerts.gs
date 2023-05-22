@@ -48,16 +48,17 @@ function thresholdBuilder(e) {
       .addItem("Slack (Coming soon!)","slack",false)
       .addItem("Calendar Event (Coming soon!)","calendar",false)
     )
-    .addWidget(CardService.newDecoratedText()
-    // .setTopLabel("Highlight")
-    .setText("Highlight Territory Map Cell")
-    .setWrapText(true)
-    .setSwitchControl(CardService.newSwitch()
-        .setFieldName("highlight-cell")
-        .setSelected(true)
-        .setValue("true")
-      )
-    )
+
+    // .addWidget(CardService.newDecoratedText()
+    // // .setTopLabel("Highlight")
+    // .setText("Highlight Territory Map Cell")
+    // .setWrapText(true)
+    // .setSwitchControl(CardService.newSwitch()
+    //     .setFieldName("highlight-cell")
+    //     .setSelected(true)
+    //     .setValue("true")
+    //   )
+    // )
   )
 
   builder.addSection(CardService.newCardSection()
@@ -66,7 +67,17 @@ function thresholdBuilder(e) {
         .setText('Set Thresholds')
         .setTextButtonStyle(CardService.TextButtonStyle.FILLED)
         .setOnClickAction(CardService.newAction().setFunctionName('addThresholdsFromTerritoryMap'))
-        .setDisabled(false))));
+        .setDisabled(false))))
+
+  builder.addSection(CardService.newCardSection()
+    .setHeader("Test Existing Thresholds")
+    .addWidget(CardService.newDecoratedText()
+        .setText("Test Thresholds")
+        .setOnClickAction(CardService.newAction().setFunctionName('testThresholds'))
+        .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.PHONE))
+        .setWrapText(true)
+    )
+  );
 
   return builder.build();
 
@@ -223,15 +234,24 @@ function addThresholdsFromTerritoryMap(e) {
   userProperties.setProperty("userEmail", SpreadsheetApp.getActiveSpreadsheet().getOwner().getEmail());
   userProperties.setProperty("userName", SpreadsheetApp.getActiveSpreadsheet().getOwner().getUsername())
   userProperties.setProperty("configThresholdsSheet", SpreadsheetApp.getActiveSpreadsheet().getUrl() + "#gid=" + activeSheet.getSheetId());
+  userProperties.setProperty("spreadSheetUrl", SpreadsheetApp.getActiveSpreadsheet().getUrl());
   // Logger.log(JSON.parse(userProperties.getProperty("thresholdJson")));
 
   updateThresholdMap();
+
+  createThresholdCheckTrigger();
 
   return CardService.newActionResponseBuilder()
     .setNotification(CardService.newNotification()
     .setText("Thresholds have been configured."))
     .setNavigation(CardService.newNavigation().popToRoot())
     .build();
+}
+
+function createThresholdCheckTrigger() {
+  if(ScriptApp.getProjectTriggers().filter(t => t.getHandlerFunction() == "getThresholdValuesFromSfdc").length == 0) {
+    ScriptApp.newTrigger("getThresholdValuesFromSfdc").timeBased().everyHours(1).create();
+  }
 }
 
 function getUserName() {

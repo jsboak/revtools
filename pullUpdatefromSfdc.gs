@@ -97,7 +97,10 @@ function retrievePullDataFromSfdc() {
   accountQuery = accountQuery.substring(0, accountQuery.length-2) + `${oppQuery}` + `+from+Account+WHERE+OwnerId='${currentSfdcUser}'`;
 
   var getDataURL = '/services/data/v57.0/query/?q='+accountQuery;
-  var sfdcData = salesforceEntryPoint(userProperties.getProperty(baseURLPropertyName) + getDataURL,"get","",false);
+
+  if(isTokenValid) {
+    var sfdcData = salesforceEntryPoint(userProperties.getProperty(baseURLPropertyName) + getDataURL,"get","",false);
+  }
 
   Logger.log("Retrieved pull-data from SFDC");
 
