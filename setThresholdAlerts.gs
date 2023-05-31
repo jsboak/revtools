@@ -41,7 +41,6 @@ function thresholdBuilder(e) {
 
   builder.addSection(CardService.newCardSection()
     .setHeader("Notification Preferences")
-    // .addWidget(CardService.newImage().setImageUrl("https://freeiconshop.com/wp-content/uploads/edd/phone-flat.png"))
     .addWidget(CardService.newSelectionInput().setTitle("Notification Method")
       .setFieldName("notificationMethod")
       .setType(CardService.SelectionInputType.DROPDOWN)
@@ -79,7 +78,7 @@ function getThresholdProperty() {
 
   if(userProperties.getProperty("thresholdJson")) {
 
-    Logger.log("Property exists: " + userProperties.getProperty("thresholdJson"));
+    // Logger.log("Property exists: " + userProperties.getProperty("thresholdJson"));
     return JSON.parse(userProperties.getProperty("thresholdJson"));
   } else {
 
@@ -166,7 +165,6 @@ function addThresholdsFromTerritoryMap(e) {
     return CardService.newActionResponseBuilder()
     .setNotification(CardService.newNotification()
     .setText("Threshold value must be a number."))
-    // .setNavigation(CardService.newNavigation().popToRoot())
     .build(); 
   }
 

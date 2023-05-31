@@ -1,20 +1,3 @@
-/*
-thresholdJson DB Table:
-{
-  NumberOfEmployees={
-    0018Y00002xtfWWQAY={thresholdInequality=Less Than, Account=Rapid API, fieldName=Employees, thresholdValue=1234567890, notificationMethod=E-mail, thresholdCrossOn=}, 
-    0018Y00002xtfWTQAY={notificationMethod=E-mail, thresholdInequality=Less Than, Account=Grafana Labs, thresholdValue=1234567890, fieldName=Employees, thresholdCrossOn=}, 
-    0018Y00002xtfWVQAY={fieldName=Employees, Account=Snyk.io, notificationMethod=E-mail, thresholdInequality=Less Than, thresholdValue=1234567890, thresholdCrossOn=05/11/2023}, 
-    0018Y00002xtfWUQAY={Account=MongoDB, fieldName=Employees, thresholdInequality=Less Than, notificationMethod=E-mail, thresholdValue=1234567890, thresholdCrossOn=}
-}, 
-  ARR__c={
-    0018Y00002xtfWXQAY={thresholdInequality=Greater Than, thresholdValue=123456789, fieldName=ARR, Account=Notion, notificationMethod=E-mail, thresholdCrossOn=}, 
-    0018Y00002xtfWYQAY={thresholdValue=123456789, thresholdInequality=Greater Than, fieldName=ARR, notificationMethod=E-mail, Account=Plaid, thresholdCrossOn=}, 
-    0018Y00002xtfWZQAY={thresholdValue=123456789, thresholdInequality=Greater Than, fieldName=ARR, notificationMethod=E-mail, Account=Calendly, thresholdCrossOn=05/5/2023}, 
-    0018Y00002xtfWWQAY={Account=Rapid API, thresholdValue=123456789, fieldName=ARR, thresholdInequality=Greater Than, notificationMethod=E-mail, thresholdCrossOn=}
-  }
-}
-*/
 function getThresholdValuesFromSfdc(e) {
 
   var adHocInvocation;
@@ -86,7 +69,6 @@ function checkThresholdValues(sfdcData, thresholdJson, adHocInvocation) {
 
           if(thresholdJson[sfdcField][accountId]["notificationMethod"] == "E-mail") {
 
-            // TODO: change sfdcField from using fieldId to use field name 
             accountsInEmailBody+= "Account: " + thresholds.Account + 
               "{{newline}}Field: " + fieldName + 
               "{{newline}}Threshold: " + inequality + " " + thresholdValue +
@@ -127,48 +109,6 @@ function sendEmail(accountsInEmailBody) {
   MailApp.sendEmail(userProperties.getProperty("userEmail") ,"RevTools: Thresholds Crossed for Accounts", "", emailOptions)
 
 }
-
-// function testThresholds() {
-
-//   getThresholdValuesFromSfdc()
-//   updateThresholdSheetFromProperty(true); //Users should receive email, even if email has already been sent on schedule.
-//   var accountRowMap = mapAccountIdRows();
-//   var fieldIdColumnMap = mapFieldIdColumns();
-
-//   var configuredThresholds = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds");
-//   var territoryMap = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Territory Map").getDataRange();
-//   var thresholds = configuredThresholds.getDataRange();
-
-//   var numColumns = thresholds.getLastColumn()
-
-//   //We should change this to use JsonThresholds instead of Configured Thresholds spreadsheet.
-//   for (let j = 1; j < thresholds.getValues().length; j++) {
-
-//     var accountId = thresholds.getCell(j+1,numColumns).getValue();
-//     var fieldId = thresholds.getCell(j+1,numColumns-1).getValue();
-
-//     var currentValue = territoryMap.getCell(accountRowMap[accountId], fieldIdColumnMap[fieldId]).getValue();
-
-//     thresholds.getCell(j+1,3).setValue(currentValue); //TODO: move away from hardcoded column value
-
-//     var inequality = configuredThresholds.getRange(j+1,4).getValue().toString(); //move away from hardcoded column value
-//     var thresholdValue = configuredThresholds.getRange(j+1,5).getValue(); //move away from hardcoded column value
-
-//     if( (inequality == "Less Than" && currentValue < thresholdValue) || 
-//         (inequality == "Greater Than" && currentValue > thresholdValue) || 
-//         (inequality == "Equal To" && currentValue == thresholdValue)) {
-
-//       territoryMap.getCell(accountRowMap[accountId], fieldIdColumnMap[fieldId]).setBackground("red");
-
-//     };
-//   }
-
-//   return CardService.newActionResponseBuilder()
-//     .setNotification(CardService.newNotification()
-//     .setText("Thresholds have been tested."))
-//     .setNavigation(CardService.newNavigation().popToRoot())
-//     .build();
-// }
 
 function mapAccountIdRows() {
 
