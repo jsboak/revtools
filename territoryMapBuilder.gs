@@ -26,7 +26,7 @@ function goToTerritoryBuilder(e) {
       .setHeader(CardService.newCardHeader().setTitle(title))
 
       builder.addSection(CardService.newCardSection().setHeader("Accounts Fields Selection")
-      .addWidget(CardService.newDecoratedText().setText("Select the desired fields for your Territory Map.").setWrapText(true).setIcon(CardService.Icon.DESCRIPTION))
+      .addWidget(CardService.newDecoratedText().setText("Select the desired fields for your Territory Map.\nAccount Name will be included by default.").setWrapText(true).setIcon(CardService.Icon.DESCRIPTION))
       )
       builder.addSection(CardService.newCardSection()
       .setCollapsible(true)
@@ -87,7 +87,11 @@ function generateFieldsSelector(sfdcAccountFields, fieldName, fieldTitle) {
 
   Object.keys(sfdcAccountFields).sort().
     forEach((function(v, i) {
-      selectionInput.addItem(sfdcAccountFields[v].label, v, false);
+
+      if( sfdcAccountFields[v].label != "Account Name") {
+        selectionInput.addItem(sfdcAccountFields[v].label, v, false);
+      }
+
     }));
 
   return selectionInput;
@@ -100,6 +104,7 @@ function generateFieldsDropdown(sfdcAccountFields, fieldName, fieldTitle) {
 
   Object.keys(sfdcAccountFields).sort().
     forEach((function(v, i) {
+
       selectionInput.addItem(sfdcAccountFields[v].label, v, false);
     }));
 

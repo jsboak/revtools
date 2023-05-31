@@ -15,7 +15,14 @@ thresholdJson DB Table:
   }
 }
 */
-function getThresholdValuesFromSfdc(adHocInvocation) {
+function getThresholdValuesFromSfdc(e) {
+
+  var adHocInvocation;
+  if(e.parameters["adHocInvocation"]) {
+    adHocInvocation = e.parameters["adHocInvocation"];
+  } else {
+    adHocInvocation ="";
+  }
 
   //This will use the thresholdJson property to query SFDC to retrieve the current values of the SFDC fields
   var thresholdJson = getThresholdProperty();
@@ -66,20 +73,24 @@ function checkThresholdValues(sfdcData, thresholdJson, adHocInvocation) {
       var currentValue = sfdcData.records[index][sfdcField];
       var inequality = thresholds.thresholdInequality;
       var thresholdValue = thresholds.thresholdValue;
+      var fieldName = thresholds.fieldName
 
       if( (inequality == "Less Than" && currentValue < thresholdValue) || 
         (inequality == "Greater Than" && currentValue > thresholdValue) || 
         (inequality == "Equal To" && currentValue == thresholdValue)) {
 
-        if(!thresholdJson[sfdcField][accountId]["thresholdCrossedOn"] || adHocInvocation) {
-
+        if(!thresholdJson[sfdcField][accountId]["thresholdCrossedOn"] || adHocInvocation === "adHoc") {
+          
           thresholdJson[sfdcField][accountId]["thresholdCrossedOn"] = today;
           thresholdJson[sfdcField][accountId]["currentValue"] = currentValue;
 
           if(thresholdJson[sfdcField][accountId]["notificationMethod"] == "E-mail") {
 
             // TODO: change sfdcField from using fieldId to use field name 
-            accountsInEmailBody+= "Account: " + thresholds.Account + " Field: " + sfdcField + " Current Value " + currentValue + " Threshold = " + inequality + " " + thresholdValue + "{{newline}}";
+            accountsInEmailBody+= "Account: " + thresholds.Account + 
+              "{{newline}}Field: " + fieldName + 
+              "{{newline}}Threshold: " + inequality + " " + thresholdValue +
+              "{{newline}}Current Value: " + currentValue + "{{newline}}{{newline}}";
 
           }
         }
@@ -97,6 +108,10 @@ function checkThresholdValues(sfdcData, thresholdJson, adHocInvocation) {
 
 }
 
+function getThreshold() {
+  Logger.log(userProperties.getProperty("thresholdJson"))
+}
+
 function sendEmail(accountsInEmailBody) {
 
   const template = HtmlService.createTemplateFromFile('emailNotificationTemplate');
@@ -105,51 +120,52 @@ function sendEmail(accountsInEmailBody) {
   template.territoryMapUrl = userProperties.getProperty("configThresholdsSheet");
   const htmlBody = template.evaluate().getContent().replace(/{{newline}}/g, '<br>');
 
-  var emailOptions = {name: "RevTools.io", noReply:true, htmlBody: htmlBody}
+  var emailOptions = {name: "SeeGlass.ai", noReply:true, htmlBody: htmlBody}
   MailApp.sendEmail(userProperties.getProperty("userEmail") ,"RevTools: Thresholds Crossed for Accounts", "", emailOptions)
 
-
 }
 
-function testThresholds() {
+// function testThresholds() {
 
-  getThresholdValuesFromSfdc()
-  updateThresholdSheetFromProperty(true); //Users should receive email, even if email has already been sent on schedule.
-  var accountRowMap = mapAccountIdRows();
-  var fieldIdColumnMap = mapFieldIdColumns();
+//   getThresholdValuesFromSfdc()
+//   updateThresholdSheetFromProperty(true); //Users should receive email, even if email has already been sent on schedule.
+//   var accountRowMap = mapAccountIdRows();
+//   var fieldIdColumnMap = mapFieldIdColumns();
 
-  var configuredThresholds = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds");
-  var territoryMap = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Territory Map").getDataRange();
-  var thresholds = configuredThresholds.getDataRange();
+//   var configuredThresholds = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds");
+//   var territoryMap = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Territory Map").getDataRange();
+//   var thresholds = configuredThresholds.getDataRange();
 
-  //We should change this to use JsonThresholds instead of Configured Thresholds spreadsheet.
-  for (let j = 1; j < thresholds.getValues().length; j++) {
+//   var numColumns = thresholds.getLastColumn()
 
-    var accountId = thresholds.getCell(j+1,26).getValue();
-    var fieldId = thresholds.getCell(j+1,25).getValue();
+//   //We should change this to use JsonThresholds instead of Configured Thresholds spreadsheet.
+//   for (let j = 1; j < thresholds.getValues().length; j++) {
 
-    var currentValue = territoryMap.getCell(accountRowMap[accountId], fieldIdColumnMap[fieldId]).getValue();
+//     var accountId = thresholds.getCell(j+1,numColumns).getValue();
+//     var fieldId = thresholds.getCell(j+1,numColumns-1).getValue();
 
-    thresholds.getCell(j+1,3).setValue(currentValue); //TODO: move away from hardcoded column value
+//     var currentValue = territoryMap.getCell(accountRowMap[accountId], fieldIdColumnMap[fieldId]).getValue();
 
-    var inequality = configuredThresholds.getRange(j+1,4).getValue().toString(); //move away from hardcoded column value
-    var thresholdValue = configuredThresholds.getRange(j+1,5).getValue(); //move away from hardcoded column value
+//     thresholds.getCell(j+1,3).setValue(currentValue); //TODO: move away from hardcoded column value
 
-    if( (inequality == "Less Than" && currentValue < thresholdValue) || 
-        (inequality == "Greater Than" && currentValue > thresholdValue) || 
-        (inequality == "Equal To" && currentValue == thresholdValue)) {
+//     var inequality = configuredThresholds.getRange(j+1,4).getValue().toString(); //move away from hardcoded column value
+//     var thresholdValue = configuredThresholds.getRange(j+1,5).getValue(); //move away from hardcoded column value
 
-      territoryMap.getCell(accountRowMap[accountId], fieldIdColumnMap[fieldId]).setBackground("red");
+//     if( (inequality == "Less Than" && currentValue < thresholdValue) || 
+//         (inequality == "Greater Than" && currentValue > thresholdValue) || 
+//         (inequality == "Equal To" && currentValue == thresholdValue)) {
 
-    };
-  }
+//       territoryMap.getCell(accountRowMap[accountId], fieldIdColumnMap[fieldId]).setBackground("red");
 
-  return CardService.newActionResponseBuilder()
-    .setNotification(CardService.newNotification()
-    .setText("Thresholds have been tested."))
-    .setNavigation(CardService.newNavigation().popToRoot())
-    .build();
-}
+//     };
+//   }
+
+//   return CardService.newActionResponseBuilder()
+//     .setNotification(CardService.newNotification()
+//     .setText("Thresholds have been tested."))
+//     .setNavigation(CardService.newNavigation().popToRoot())
+//     .build();
+// }
 
 function mapAccountIdRows() {
 
@@ -158,9 +174,11 @@ function mapAccountIdRows() {
 
   var accountIdRowMap = {}
 
+  var numColumns = accountIds.getValues()[0].length;
+
   for (let i = 2; i < accountIds.getValues().length; i++) {
 
-    accountId = accountIds.getCell(i+1,26).getValue();
+    accountId = accountIds.getCell(i+1,numColumns).getValue();
 
     accountIdRowMap[accountId] = i+1;
 
@@ -177,8 +195,10 @@ function mapFieldIdColumns() {
 
   var fieldIdColumnMap = {}
 
+  var numColumns = fieldIds.getLastColumn()
+
   //iterate over columns
-  for (let i = 1; i < 27; i++) {
+  for (let i = 1; i < numColumns+1; i++) {
 
     fieldId = fieldIds.getCell(2,i).getValue();
 

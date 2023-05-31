@@ -117,6 +117,8 @@ function doGet(e) {
 
 function salesforceEntryPoint(url, requestMethod, payload, muteHttpExceptions){
 
+  isTokenValid();
+
   var token = userProperties.getProperty(tokenPropertyName);
   var requestDetails = {
     "contentType" : "application/json",

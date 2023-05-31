@@ -62,7 +62,11 @@ function updateSheetFromSfdcPull() {
 function retrievePullDataFromSfdc() {
 
   var territoryMap = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Territory Map");
-  var fieldIds = territoryMap.getDataRange();
+
+  var fields = territoryMap.getRange("A2:2").getValues()[0];
+  let uniqueFields = [...new Set(fields)];
+
+  Logger.log(uniqueFields);
 
   if(currentSfdcUser == null) {
     getCurrentSfdcUser();
@@ -72,11 +76,14 @@ function retrievePullDataFromSfdc() {
   var accountQuery = "SELECT+Id,+";
   
   //iterate over columns
-  for (let i = 1; i < 26; i++) {
+  for (let i = 0; i < fields.length; i++) {
 
-    fieldId = fieldIds.getCell(2,i).getValue().toString();
+    
+    fieldId = uniqueFields[i];
 
-    if(fieldId != "") {
+    if(fieldId != "" && fieldId != null) {
+
+      Logger.log(uniqueFields[i]);
 
       if(fieldId.startsWith("opp-")) {
         fieldId = "Opportunity." + fieldId.substring(4);

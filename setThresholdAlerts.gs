@@ -73,7 +73,7 @@ function thresholdBuilder(e) {
     .setHeader("Test Existing Thresholds")
     .addWidget(CardService.newDecoratedText()
         .setText("Test Thresholds")
-        .setOnClickAction(CardService.newAction().setFunctionName('testThresholds'))
+        .setOnClickAction(CardService.newAction().setFunctionName('getThresholdValuesFromSfdc').setParameters({adHocInvocation: "adHoc"}))
         .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.PHONE))
         .setWrapText(true)
     )

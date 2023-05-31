@@ -69,7 +69,7 @@ function logPush(e) {
 
           Logger.log("Only one field-update can be pushsed to Salesforce at a time.")
           
-          SpreadsheetApp.getActive().toast("Only one field-update can be pushsed to Salesforce at a time.", "Tip!", "5"); 
+          SpreadsheetApp.getActive().toast("Only one field-update can be pushed to Salesforce at a time.", "Tip!", "5"); 
 
           updateSheetFromSfdcPull();
         }
