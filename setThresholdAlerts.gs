@@ -26,6 +26,8 @@ function thresholdBuilder(e) {
     .addItem("Equal To","Equal To",false)
     )
     .addWidget(CardService.newTextInput()
+      .setValue("10")
+      .setHint("Integer Value")
       .setFieldName("thresholdValue")
       .setTitle("Threshold Value")
     )
@@ -49,16 +51,6 @@ function thresholdBuilder(e) {
       .addItem("Calendar Event (Coming soon!)","calendar",false)
     )
 
-    // .addWidget(CardService.newDecoratedText()
-    // // .setTopLabel("Highlight")
-    // .setText("Highlight Territory Map Cell")
-    // .setWrapText(true)
-    // .setSwitchControl(CardService.newSwitch()
-    //     .setFieldName("highlight-cell")
-    //     .setSelected(true)
-    //     .setValue("true")
-    //   )
-    // )
   )
 
   builder.addSection(CardService.newCardSection()
@@ -169,6 +161,14 @@ function modifyThresholdsFromConfiguredThresholds() {
 }
 
 function addThresholdsFromTerritoryMap(e) {
+
+  if(isNaN(e.formInput.thresholdValue)) {
+    return CardService.newActionResponseBuilder()
+    .setNotification(CardService.newNotification()
+    .setText("Threshold value must be a number."))
+    // .setNavigation(CardService.newNavigation().popToRoot())
+    .build(); 
+  }
 
   var activeSheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
   if(activeSheet.getName() == "Territory Map") {
