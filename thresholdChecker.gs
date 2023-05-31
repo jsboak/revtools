@@ -96,6 +96,9 @@ function checkThresholdValues(sfdcData, thresholdJson, adHocInvocation) {
         }
       }
     }
+    if(adHocInvocation === "adHoc") {
+      updateThresholdSheetFromProperty();
+    }
   }
 
   // Logger.log(thresholdJson)

@@ -87,7 +87,7 @@ function getThresholdProperty() {
 
   if(userProperties.getProperty("thresholdJson")) {
 
-    // Logger.log("Property exists: " + userProperties.getProperty("thresholdJson"));
+    Logger.log("Property exists: " + userProperties.getProperty("thresholdJson"));
     return JSON.parse(userProperties.getProperty("thresholdJson"));
   } else {
 
@@ -118,6 +118,7 @@ function modifyThresholdsFromConfiguredThresholds() {
   var accountIdColumn = sheetValues[0].indexOf("Account ID");
   var accountNameColumn = sheetValues[0].indexOf("Account Name");
   var currentValueColumn = sheetValues[0].indexOf("Current Value");
+  var thresholdCrossedOnColumn = sheetValues[0].indexOf("Threshold Crossed On Date");
 
   for (let i = 1; i < sheetValues.length; i++) {
 
@@ -131,6 +132,7 @@ function modifyThresholdsFromConfiguredThresholds() {
       var accountId = sheetValues[i][accountIdColumn];
       var accountName = sheetValues[i][accountNameColumn];
       var currentValue = sheetValues[i][currentValueColumn];
+      var thresholdCrossedOn = sheetValues[i][thresholdCrossedOnColumn];
 
       if(thresholdJson[fieldId]) {
         thresholdJson[fieldId][accountId] = {"Account":accountName, 
@@ -139,7 +141,8 @@ function modifyThresholdsFromConfiguredThresholds() {
           "thresholdValue":thresholdValue,
           "notificationMethod":notificationMethod,
           "thresholdDescription":thresholdDescription,
-          "currentValue":currentValue
+          "currentValue":currentValue,
+          "thresholdCrossedOn":thresholdCrossedOn
           };
       } else {
         thresholdJson[fieldId] = {};
@@ -149,9 +152,11 @@ function modifyThresholdsFromConfiguredThresholds() {
           "thresholdValue":thresholdValue,
           "notificationMethod":notificationMethod,
           "thresholdDescription":thresholdDescription,
-          "currentValue":currentValue
+          "currentValue":currentValue,
+          "thresholdCrossedOn":thresholdCrossedOn
         }
       }
+
     } catch(E) {
       Logger.log(E);
     }
@@ -304,51 +309,40 @@ function updateThresholdMap() {
 
 }
 
-/*
-thresholdJson DB Table:
-{
-  NumberOfEmployees={
-    0018Y00002xtfWWQAY={thresholdInequality=Less Than, Account=Rapid API, fieldName=Employees, thresholdValue=1234567890, notificationMethod=E-mail, thresholdCrossOn=}, 
-    0018Y00002xtfWTQAY={notificationMethod=E-mail, thresholdInequality=Less Than, Account=Grafana Labs, thresholdValue=1234567890, fieldName=Employees, thresholdCrossOn=}, 
-    0018Y00002xtfWVQAY={fieldName=Employees, Account=Snyk.io, notificationMethod=E-mail, thresholdInequality=Less Than, thresholdValue=1234567890, thresholdCrossOn=05/11/2023}, 
-    0018Y00002xtfWUQAY={Account=MongoDB, fieldName=Employees, thresholdInequality=Less Than, notificationMethod=E-mail, thresholdValue=1234567890, thresholdCrossOn=}
-}, 
-  ARR__c={
-    0018Y00002xtfWXQAY={thresholdInequality=Greater Than, thresholdValue=123456789, fieldName=ARR, Account=Notion, notificationMethod=E-mail, thresholdCrossOn=}, 
-    0018Y00002xtfWYQAY={thresholdValue=123456789, thresholdInequality=Greater Than, fieldName=ARR, notificationMethod=E-mail, Account=Plaid, thresholdCrossOn=}, 
-    0018Y00002xtfWZQAY={thresholdValue=123456789, thresholdInequality=Greater Than, fieldName=ARR, notificationMethod=E-mail, Account=Calendly, thresholdCrossOn=05/5/2023}, 
-    0018Y00002xtfWWQAY={Account=Rapid API, thresholdValue=123456789, fieldName=ARR, thresholdInequality=Greater Than, notificationMethod=E-mail, thresholdCrossOn=}
-  }
-}
-
-TODO: we need to keep the Configured Thresholds sheet as up to date with the DB table as possible. 
-So we should create onOpen() and onEdit() and maybe onChange() triggers to frequently update the Sheet from the DB Table (ie. the thresholdJson property).
-NOTE: by updating the sheet from the property, we are not querying SFDC as part of that operation. 
-Querying SFDC will only happen on the schedule (e.g. once per hour) or when the "Check Thresholds" button is clicked.
-*/
-
 function updateThresholdSheetFromProperty() {
 
   Logger.log("Adding Thresholds to sheet");
 
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds");
+  var headerRow = sheet.getRange("A1:1").getValues()[0];
   var thresholdJson = JSON.parse(userProperties.getProperty("thresholdJson"));
   var thresholdMatrix = []
   var fieldIdMatrix = []
   var numRows=0;
 
+  var accountIndex = headerRow.indexOf("Account Name")
+  var fieldNameIndex = headerRow.indexOf("Configured Field")
+  var currentValueIndex = headerRow.indexOf("Current Value")
+  var thresholdInequalityIndex = headerRow.indexOf("Threshold Conditional")
+  var thresholdValueIndex = headerRow.indexOf("Threshold Metric")
+  var notificationMethodIndex = headerRow.indexOf("Notification Method")
+  var thresholdDescriptionIndex = headerRow.indexOf("Threshold Description")
+  var thresholdCrossedOnIndex = headerRow.indexOf("Threshold Crossed On Date")
+
   for (var sfdcField of Object.keys(thresholdJson)) {
 
     for (var sfdcAccountId of Object.keys(thresholdJson[sfdcField])) {
 
-      var accountRow = [
-        thresholdJson[sfdcField][sfdcAccountId]["Account"],
-        thresholdJson[sfdcField][sfdcAccountId]["fieldName"],
-        thresholdJson[sfdcField][sfdcAccountId]["currentValue"],
-        thresholdJson[sfdcField][sfdcAccountId]["thresholdInequality"],
-        thresholdJson[sfdcField][sfdcAccountId]["thresholdValue"],
-        thresholdJson[sfdcField][sfdcAccountId]["notificationMethod"],
-        thresholdJson[sfdcField][sfdcAccountId]["thresholdDescription"]];
+      var accountRow = Array.apply(null, Array(8))
+      accountRow[accountIndex] = thresholdJson[sfdcField][sfdcAccountId]["Account"];
+      accountRow[fieldNameIndex] = thresholdJson[sfdcField][sfdcAccountId]["fieldName"]
+      accountRow[currentValueIndex] = thresholdJson[sfdcField][sfdcAccountId]["currentValue"]
+      accountRow[thresholdInequalityIndex] = thresholdJson[sfdcField][sfdcAccountId]["thresholdInequality"]
+      accountRow[thresholdValueIndex] = thresholdJson[sfdcField][sfdcAccountId]["thresholdValue"]
+      accountRow[notificationMethodIndex] = thresholdJson[sfdcField][sfdcAccountId]["notificationMethod"]
+      accountRow[thresholdDescriptionIndex] = thresholdJson[sfdcField][sfdcAccountId]["thresholdDescription"]
+      accountRow[thresholdCrossedOnIndex] = thresholdJson[sfdcField][sfdcAccountId]["thresholdCrossedOn"]
+
       thresholdMatrix.push(accountRow)
 
       var fieldRow = [[sfdcField],[sfdcAccountId]]
@@ -359,7 +353,7 @@ function updateThresholdSheetFromProperty() {
 
   }
   Logger.log("Placing threshold values into sheet");
-  sheet.getRange(2,1,numRows,7).setValues(thresholdMatrix);
+  sheet.getRange(2,1,numRows,8).setValues(thresholdMatrix);
   sheet.getRange(2,25,numRows,2).setValues(fieldIdMatrix);
 
   SpreadsheetApp.setActiveSheet(SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Configured Thresholds"));
