@@ -39,7 +39,7 @@ function createNewOppMap(e) {
 
 function addColumnsToExistingOppMap(oppSheet, e, firstEmptyColumn) {
 
-  var oppFields = getOppFields();
+  var oppFields = getOpportunityFields();
 
   var numberOfFields = e.formInputs.sfdc_opp_fields.length;
 
