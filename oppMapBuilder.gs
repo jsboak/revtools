@@ -77,11 +77,12 @@ function generateFieldsSelector(sfdcOppFields, fieldName, fieldTitle) {
 
       if( sfdcOppFields[v].label != "Name") {
         selectionInput.addItem(sfdcOppFields[v].label, v, false);
+
       }
 
     }));
 
-  // selectionInput.addItem("Account Name",'{"label":"Account Name","value":"Account.Name","type":"String"}',false)
+  selectionInput.addItem("Account Name","Account.Name",false)
 
   return selectionInput;
 }

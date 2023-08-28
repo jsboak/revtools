@@ -102,28 +102,27 @@ function addDataToNewOppMap(oppSheet, e, existing, firstEmptyColumn) {
       if(oppField == "null") {
         oppField = "";
       }
-      // var parsedElement = JSON.parse(oppField);
+      if(oppField.includes(".")) {
+        var splitElement = oppField.split(".");
+        var objectName = splitElement[0];
+        var fieldName = splitElement[1];
+        if(opps.records[j][objectName] == null) {
+          oppRow.push("");
+        } else {
 
-      // if(parsedElement.value.includes(".")){
-      //   var splitElement = parsedElement.value.split(".")
-      //   var objectName = splitElement[0];
-      //   var fieldName = splitElement[1];
-
-      //   if(opps.records[j][objectName] != null) {
-      //     // Logger.log("Account Name: " + opps.records[j][objectName][fieldName])
-      //     oppRow.push(opps.records[j][objectName][fieldName])
-      //   }
-      // } else {
-      //   oppRow.push(opps.records[j][parsedElement.value]);
-      // }
-      oppRow.push(opps.records[j][oppField]);
+          oppRow.push(opps.records[j][objectName][fieldName])
+        }
+      } else {
+        oppRow.push(opps.records[j][oppField]);
+      }
+      
     }
     oppNameMatrix.push(oppNameField);
     oppIdMatrix.push(oppIdField);
     oppMatrix.push(oppRow)
     
   }
-  Logger.log(oppMatrix);
+
   oppSheet.getRange(3,2,opps.totalSize, numColumns+1).setHorizontalAlignment("center");
 
   oppMap.setValues(oppMatrix).setHorizontalAlignment("center");
@@ -159,22 +158,12 @@ function retrieveOppsOwnedByCurrentUser(e) {
     getCurrentSfdcUser();
   }
 
-  // var oppQuery = "";
-  // if(e.formInput.include_open_opp_key) {
-  //   oppQuery = `,+(SELECT+Opportunity.Id,+Opportunity.Name,+Opportunity.NextStep+FROM+Opp.Opportunities+WHERE+IsClosed+=+FALSE+LIMIT+1)`;
-  // }
-
   var oppQuery = "SELECT+Name,Id,+";
   for(i=0; i < e.formInputs.sfdc_opp_fields.length; i++) {
     // var element = JSON.parse(e.formInputs.sfdc_opp_fields[i]);
     var element = e.formInputs.sfdc_opp_fields[i]
     oppQuery = oppQuery + element + ",+"
   }
-
-  // e.formInputs.sfdc_opp_fields.forEach(element =>
-
-  //   oppQuery = oppQuery + element.value + ",+"
-  // );
 
   oppQuery = oppQuery.substring(0, oppQuery.length-2) + `+from+Opportunity+WHERE+OwnerId='${currentSfdcUser}'`;
   
@@ -183,6 +172,7 @@ function retrieveOppsOwnedByCurrentUser(e) {
   var opps = salesforceEntryPoint(userProperties.getProperty(baseURLPropertyName) + getDataURL,"get","",false);
 
   Logger.log("Retrieved opps from SFDC");
+  // Logger.log("opps: " + opps);
 
   return opps;
 
@@ -224,24 +214,18 @@ function createSheetForNewOpp(e) {
 
     var element = e.formInputs.sfdc_opp_fields[i];
 
-    Logger.log(element);    
-    headerRowLabels.push(oppFields[element].label)
-    headerRowIds.push(element)
+    if(oppFields[element] == null) {
 
-    Logger.log(element);
-    Logger.log(element.label)
+      headerRowLabels.push(element.replace("."," "));
+      headerRowIds.push(element);
+
+    } else {
+      
+      headerRowLabels.push(oppFields[element].label)
+      headerRowIds.push(element)
+    }   
+
   };
-
-  // if(e.formInput.include_open_opp_key) {
-    
-  //   headerRows = oppMap.getRange(1,1,2,numColumns+3).setHorizontalAlignment("center").setTextStyle(bold);
-
-  //   headerRowLabels.push(["Opportunity Name"],["Opportunity Next Step"])
-  //   headerRowIds.push(["opp-Name"],["opp-NextStep"])
-
-  //   oppMap.setColumnWidths(1, numColumns+3, 200);
-
-  // }
 
   oppMatrix.push(headerRowLabels);
   oppMatrix.push(headerRowIds);
