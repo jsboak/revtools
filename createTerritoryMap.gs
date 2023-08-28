@@ -39,14 +39,7 @@ function createNewTerritoryMap(e) {
 function addColumnsToExistingTerritoryMap(territorySheet, e, firstEmptyColumn) {
 
   var accountFields = getAccountFields();
-  // var sheetArray = territorySheet.getDataRange().getValues();
-  // var firstEmptyHeader = sheetArray[0].indexOf("") + 1; //Plus one because array index starts at zero but column numbers start at 1
-  // var firstEmptyFirstRow = sheetArray[2].indexOf("") + 1;
-  // if(firstEmptyHeader > firstEmptyFirstRow) {
-  //   var firstEmptyColumn = firstEmptyHeader;
-  // } else {
-  //   var firstEmptyColumn = firstEmptyFirstRow;
-  // }
+
   var numberOfFields = e.formInputs.sfdc_territory_fields.length;
 
   var columnMatrix = [];
@@ -206,10 +199,7 @@ function getCurrentSfdcUser() {
 
   //For testing:
   // Chris' userID
-  currentSfdcUser = '0058Y00000CFhvzQAD'
-
-  // Jakes's userID
-  // var currentSfdcUser = '0058Y00000CFhwsQAD'
+  // currentSfdcUser = '0058Y00000CFhvzQAD'
 
   return currentSfdcUser;
 }

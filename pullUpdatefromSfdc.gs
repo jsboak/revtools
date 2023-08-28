@@ -25,8 +25,14 @@ function updateSheetFromSfdcPull() {
       for (let j=0; j < pulledSfdcData.totalSize; j++) {
 
         accountId = pulledSfdcData.records[j].Id;
+
         rowToUpdate = widgetRowMap[accountId];
-        cellToUpdate = territoryMap.getRange(rowToUpdate,i);
+        try {
+          cellToUpdate = territoryMap.getRange(rowToUpdate,i);
+        } catch (error) {
+          SpreadsheetApp.getActive().toast("Account " + accountId + " not found or owned by current user.", "Error")
+          return
+        }
 
         if(fieldId == "opp-Name" && pulledSfdcData.records[j].Opportunities != null) {
           
@@ -57,6 +63,7 @@ function updateSheetFromSfdcPull() {
       }
     }
   }
+  SpreadsheetApp.getActive().toast("Sheet updated from Salesforce data.", "Update", "3");
 }
 
 function retrievePullDataFromSfdc() {

@@ -19,8 +19,8 @@
   ],
   "addOns": {
     "common": {
-      "name": "RevTools",
-      "logoUrl": "https://cdn.pixabay.com/photo/2014/04/03/11/58/rocket-312767__340.png",
+      "name": "SeeGlass",
+      "logoUrl": "https://lh3.googleusercontent.com/ubnDrCXD1wY3YKXV4wMVhRCrB-jZnaOfCtnovDaHqe79RT5nkl8rb642Ie69j52_c4o",
       "layoutProperties": {
         "primaryColor": "#2772ed"
       },
@@ -28,6 +28,10 @@
         {
           "label": "Disconnect from Salesforce",
           "runFunction": "disconnectApp"
+        },
+        {
+          "label": "Contact Support",
+          "openLink": "https://seeglass.ai/contact-us-%26-faq"
         }
       ],
       "homepageTrigger": {

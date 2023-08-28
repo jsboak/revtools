@@ -34,6 +34,14 @@ function onHomepage(e) {
       .setWrapText(true)));
 
     builder.addSection(CardService.newCardSection()
+    .addWidget(CardService.newDecoratedText()
+      .setText("Add Opportunity Report")
+      .setBottomLabel("Choose the opportunity fields to include.")
+      .setOnClickAction(CardService.newAction().setFunctionName('handleOpp'))
+      .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.DOLLAR))
+      .setWrapText(true)));
+
+    builder.addSection(CardService.newCardSection()
       .setHeader("Actions")
       .addWidget(CardService.newDecoratedText()
         .setText("Thresholds & Alerts")
@@ -41,19 +49,7 @@ function onHomepage(e) {
         .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.PHONE))
         .setBottomLabel("Get notified when specified fields match desired criteria.")
         .setWrapText(true))
-      // .addWidget(CardService.newDecoratedText()
-      //   .setText("Set Reminder")
-      //   .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.CLOCK))
-      //   .setBottomLabel("Set reminders for yourself related to certain accounts.")
-      //   .setWrapText(true))
     );
-
-    // builder.addSection(CardService.newCardSection()
-    // .addWidget(CardService.newDecoratedText()
-    //   .setText("Test Function")
-    //   .setOnClickAction(CardService.newAction().setFunctionName('testFunction'))
-    //   .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.MULTIPLE_PEOPLE))
-    //   .setWrapText(true)));
 
     builder.addSection(CardService.newCardSection()
     .addWidget(CardService.newDecoratedText()
@@ -63,16 +59,16 @@ function onHomepage(e) {
       .setEndIcon(CardService.newIconImage().setIconUrl("https://upload.wikimedia.org/wikipedia/commons/8/89/Salesforce_Users_Email_list.png"))
       .setWrapText(true)));
 
-    //TODO: potentially add a footer with a link to our website or support-docs
-    // var fixedFooter =
-    //   CardService
-    //       .newFixedFooter()
-    //       .setPrimaryButton(
-    //           CardService
-    //               .newTextButton()
-    //               .setText("Help")
-    //               .setOpenLink(CardService.newOpenLink().setUrl("http://www.google.com")));
-    // builder.setFixedFooter(fixedFooter);
+    //TODO: add a footer with a link to our website or support-docs
+    var fixedFooter =
+      CardService
+          .newFixedFooter()
+          .setPrimaryButton(
+              CardService
+                  .newTextButton()
+                  .setText("Contact Support")
+                  .setOpenLink(CardService.newOpenLink().setUrl("https://seeglass.ai/contact-us-%26-faq")));
+    builder.setFixedFooter(fixedFooter);
 
   } else {
     builder.addSection(CardService.newCardSection()
@@ -101,19 +97,6 @@ function doGet(e) {
   // onHomepage(e);
   return HtmlService.createHtmlOutput(HTMLToOutput);
 }
-
-////oAuth related code
-// function salesforceEntryPoint(URL,method, payload, muteHttpExceptions){
-//   if(isTokenValid()){
-
-//     return SFDChttpRequest(URL, method, payload, muteHttpExceptions);
-//   }
-//   else {//we are starting from scratch or resetting
-//     HTMLToOutput = "<html><h1>You need to login</h1><a href='"+getURLForAuthorization()+"'target='_blank'>Click here to start</a><br>Refresh this page when you return.</html>";
-//     SpreadsheetApp.getActiveSpreadsheet().show(HtmlService.createHtmlOutput(HTMLToOutput));
-//     return;
-//   }
-// }
 
 function salesforceEntryPoint(url, requestMethod, payload, muteHttpExceptions){
 
@@ -146,7 +129,7 @@ var TOKEN_URL = 'https://login.salesforce.com/services/oauth2/token';
 //PUT YOUR OWN SETTINGS HERE
 var CLIENT_ID = '3MVG9sn24bYFReCUDUxZgA5NMC6kyJ8qTWFftxmFlN.UtodL3rxmPWh1.WFpaAHf7_rpNNN.0mngxTxWDK2vy';
 var CLIENT_SECRET='F8B5FEF0C84D1754AD9BBC478B64383CBF6773EF2950BD04E993FB18421B4245';
-var REDIRECT_URL= "https://script.google.com/macros/s/AKfycbxLV7S67snCD-4hyox0dKn4PtA1iPBnYCcwLho90tU/dev" //ScriptApp.getService().getUrl();
+var REDIRECT_URL= "https://script.google.com/macros/s/AKfycbwRG3jQNR0UvMAyYsXQv-6ZsWEnZQsFLwc_17Xz5TOamhg41Nr_2IspGlxSIeWTvPRb/exec"//"https://script.google.com/macros/s/AKfycbxLV7S67snCD-4hyox0dKn4PtA1iPBnYCcwLho90tU/dev" 
 
 //this is the user propety where we'll store the token, make sure this is unique across all user properties across all scripts
 var userProperties = PropertiesService.getUserProperties();
@@ -159,7 +142,7 @@ var refreshTokenName = 'SALESFORCE_REFRESH_TOKEN';
 //may need to add a "scope" param here. like &scope=full for salesforce
 function getURLForAuthorization(){
   Logger.log("Authorize URL: " + AUTHORIZE_URL + '?response_type=code&client_id='+CLIENT_ID+'&redirect_uri='+REDIRECT_URL+'&display=page&prompt=select_account') //+'&scope=full')
-  return AUTHORIZE_URL + '?response_type=code&client_id='+CLIENT_ID+'&redirect_uri='+REDIRECT_URL+'&display=page&prompt=select_account' //+'&scope=full'
+  return AUTHORIZE_URL + '?response_type=code&client_id='+CLIENT_ID+'&redirect_uri='+REDIRECT_URL+'&display=page&prompt=select_account' //&scope=full'
   
 }
 

@@ -1,9 +1,9 @@
 function getThresholdValuesFromSfdc(e) {
 
   var adHocInvocation;
-  if(e.parameters["adHocInvocation"]) {
+  try {
     adHocInvocation = e.parameters["adHocInvocation"];
-  } else {
+  } catch(error) {
     adHocInvocation ="";
   }
 
@@ -29,6 +29,7 @@ function getThresholdValuesFromSfdc(e) {
 
     Logger.log("Querying SFDC to get current values for checking thresholds.")
     var sfdcData = JSON.parse(salesforceEntryPoint(userProperties.getProperty(baseURLPropertyName) + getDataURL,"get","",false));
+    // Logger.log(sfdcData)
   }
 
   checkThresholdValues(sfdcData, thresholdJson, adHocInvocation);
@@ -39,6 +40,8 @@ function findIndexByKey(list, key, value) {
   return list.findIndex(obj => obj[key] === value);
 }
 
+
+
 function checkThresholdValues(sfdcData, thresholdJson, adHocInvocation) {
 
   var today = new Date();
@@ -48,11 +51,20 @@ function checkThresholdValues(sfdcData, thresholdJson, adHocInvocation) {
   today = mm + '/' + dd + '/' + yyyy;
   var accountsInEmailBody = '';
 
+  Logger.log("JSON: " + JSON.stringify(thresholdJson))
+
   for (const[sfdcField,accounts] of Object.entries(thresholdJson)) {
 
     for (const[accountId,thresholds] of Object.entries(accounts)) {
 
       var index = findIndexByKey(sfdcData.records, "Id", accountId);
+
+      if(index == -1) {
+
+        Logger.log("No accounts in thresholds owned by currently logged in user.")
+        return 
+      }
+      
       var currentValue = sfdcData.records[index][sfdcField];
       var inequality = thresholds.thresholdInequality;
       var thresholdValue = thresholds.thresholdValue;
