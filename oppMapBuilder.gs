@@ -75,11 +75,13 @@ function generateFieldsSelector(sfdcOppFields, fieldName, fieldTitle) {
   Object.keys(sfdcOppFields).sort().
     forEach((function(v, i) {
 
-      if( sfdcOppFields[v].label != "Opp Name") {
+      if( sfdcOppFields[v].label != "Name") {
         selectionInput.addItem(sfdcOppFields[v].label, v, false);
       }
 
     }));
+
+  // selectionInput.addItem("Account Name",'{"label":"Account Name","value":"Account.Name","type":"String"}',false)
 
   return selectionInput;
 }

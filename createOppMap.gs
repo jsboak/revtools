@@ -87,8 +87,6 @@ function addDataToNewOppMap(oppSheet, e, existing, firstEmptyColumn) {
   var oppNameMatrix = [];
   var oppIdMatrix = [];
 
-
-
   for(let j=0; j < opps.totalSize; j++) {
 
     var oppRow = [];
@@ -103,7 +101,21 @@ function addDataToNewOppMap(oppSheet, e, existing, firstEmptyColumn) {
       var oppField = e.formInputs.sfdc_opp_fields[i];
       if(oppField == "null") {
         oppField = "";
-      }      
+      }
+      // var parsedElement = JSON.parse(oppField);
+
+      // if(parsedElement.value.includes(".")){
+      //   var splitElement = parsedElement.value.split(".")
+      //   var objectName = splitElement[0];
+      //   var fieldName = splitElement[1];
+
+      //   if(opps.records[j][objectName] != null) {
+      //     // Logger.log("Account Name: " + opps.records[j][objectName][fieldName])
+      //     oppRow.push(opps.records[j][objectName][fieldName])
+      //   }
+      // } else {
+      //   oppRow.push(opps.records[j][parsedElement.value]);
+      // }
       oppRow.push(opps.records[j][oppField]);
     }
     oppNameMatrix.push(oppNameField);
@@ -111,8 +123,8 @@ function addDataToNewOppMap(oppSheet, e, existing, firstEmptyColumn) {
     oppMatrix.push(oppRow)
     
   }
+  Logger.log(oppMatrix);
   oppSheet.getRange(3,2,opps.totalSize, numColumns+1).setHorizontalAlignment("center");
-  
 
   oppMap.setValues(oppMatrix).setHorizontalAlignment("center");
   var oppNameMap = oppSheet.getRange(3,1,opps.totalSize,1);
@@ -153,15 +165,23 @@ function retrieveOppsOwnedByCurrentUser(e) {
   // }
 
   var oppQuery = "SELECT+Name,Id,+";
-  e.formInputs.sfdc_opp_fields.forEach(element =>
+  for(i=0; i < e.formInputs.sfdc_opp_fields.length; i++) {
+    // var element = JSON.parse(e.formInputs.sfdc_opp_fields[i]);
+    var element = e.formInputs.sfdc_opp_fields[i]
     oppQuery = oppQuery + element + ",+"
-  );
+  }
+
+  // e.formInputs.sfdc_opp_fields.forEach(element =>
+
+  //   oppQuery = oppQuery + element.value + ",+"
+  // );
 
   oppQuery = oppQuery.substring(0, oppQuery.length-2) + `+from+Opportunity+WHERE+OwnerId='${currentSfdcUser}'`;
   
   var getDataURL = '/services/data/v57.0/query/?q='+oppQuery;
 
   var opps = salesforceEntryPoint(userProperties.getProperty(baseURLPropertyName) + getDataURL,"get","",false);
+
   Logger.log("Retrieved opps from SFDC");
 
   return opps;
@@ -173,7 +193,7 @@ function createSheetForNewOpp(e) {
   var activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
   var oppFields = getOpportunityFields();
 
-  var oppMap = activeSpreadsheet.getSheetByName("Opportunities");
+  var oppMap = activeSpreadsheet.getSheetByName("Opp Map");
 
   //WE MAY WANT TO REMOVE THIS. THIS DELETES AN EXISTING TERRITORY MAP IF ONE OF THE SAME NAME ALREADY EXISTS
   if (oppMap != null) {
@@ -201,11 +221,15 @@ function createSheetForNewOpp(e) {
   var headerRowIds = ["Name"];
 
   for(i=0; i < numColumns; i++) {
+
     var element = e.formInputs.sfdc_opp_fields[i];
 
-    // Logger.log(oppFields[element]);    
+    Logger.log(element);    
     headerRowLabels.push(oppFields[element].label)
     headerRowIds.push(element)
+
+    Logger.log(element);
+    Logger.log(element.label)
   };
 
   // if(e.formInput.include_open_opp_key) {
