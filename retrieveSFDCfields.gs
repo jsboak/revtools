@@ -31,13 +31,17 @@ function getOpportunityFields() {
 
   var fieldsList = {};
 
-  for (var i=0; i< parsedOppFields.fields.length; i++) {
+  // Logger.log(parsedOppFields.fields);
+  // for (var i=0; i< parsedOppFields.fields.length; i++) {
 
-      fieldsList[parsedOppFields.fields[i].name] = {"label":parsedOppFields.fields[i].label, "type":parsedOppFields.fields[i].type}
+  //     // fieldsList.push({"name":parsedOppFields.fields[i].name,"label":parsedOppFields.fields[i].label, "type":parsedOppFields.fields[i].type})
 
-  }
+  //     fieldsList[parsedOppFields.fields[i].name] = {"label":parsedOppFields.fields[i].label, "type":parsedOppFields.fields[i].type}
 
-  return fieldsList;
+  // }
+
+  // Logger.log("FieldsList: " + fieldsList);
+  return parsedOppFields.fields;
 
 
 }

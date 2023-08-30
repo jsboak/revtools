@@ -68,21 +68,38 @@ function goToOppBuilder(e) {
 }
 
 function generateFieldsSelector(sfdcOppFields, fieldName, fieldTitle) {
+
   var selectionInput = CardService.newSelectionInput().setTitle(fieldTitle)
     .setFieldName(fieldName)
     .setType(CardService.SelectionInputType.CHECK_BOX);
 
-  Object.keys(sfdcOppFields).sort().
-    forEach((function(v, i) {
+  sfdcOppFields.sort(function (a, b) {
+      return a.label.localeCompare(b.label);
+  });
 
-      if( sfdcOppFields[v].label != "Name") {
-        selectionInput.addItem(sfdcOppFields[v].label, v, false);
+  for (var i=0; i< sfdcOppFields.length; i++) {
 
-      }
+    // fieldsList.push({"name":parsedOppFields.fields[i].name,"label":parsedOppFields.fields[i].label, "type":parsedOppFields.fields[i].type})
 
-    }));
+    // fieldsList[parsedOppFields.fields[i].name] = {"label":parsedOppFields.fields[i].label, "type":parsedOppFields.fields[i].type}
 
-  selectionInput.addItem("Account Name","Account.Name",false)
+    selectionInput.addItem(sfdcOppFields[i]["label"], sfdcOppFields[i].name + ":" + sfdcOppFields[i].label, false);
+
+  }
+
+  // sfdcOppFields["Account.Name"] = {"label":"Account Name", "type":"String"}
+
+  // Object.keys(sfdcOppFields).sort().
+  //   forEach((function(v, i) {
+
+  //     if( sfdcOppFields[v].label != "Name") {
+  //       selectionInput.addItem(sfdcOppFields[v].label, v, false);
+
+  //     }
+
+  //   }));
+
+  // selectionInput.addItem("Account Name","Account.Name",false)
 
   return selectionInput;
 }

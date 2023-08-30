@@ -39,7 +39,7 @@ function createNewOppMap(e) {
 
 function addColumnsToExistingOppMap(oppSheet, e, firstEmptyColumn) {
 
-  var oppFields = getOpportunityFields();
+  var oppFields = getOppFields();
 
   var numberOfFields = e.formInputs.sfdc_opp_fields.length;
 
@@ -98,7 +98,7 @@ function addDataToNewOppMap(oppSheet, e, existing, firstEmptyColumn) {
 
     for(i=0; i < numColumns; i++) {
 
-      var oppField = e.formInputs.sfdc_opp_fields[i];
+      var oppField = e.formInputs.sfdc_opp_fields[i].split(":")[0];
       if(oppField == "null") {
         oppField = "";
       }
@@ -161,7 +161,7 @@ function retrieveOppsOwnedByCurrentUser(e) {
   var oppQuery = "SELECT+Name,Id,+";
   for(i=0; i < e.formInputs.sfdc_opp_fields.length; i++) {
     // var element = JSON.parse(e.formInputs.sfdc_opp_fields[i]);
-    var element = e.formInputs.sfdc_opp_fields[i]
+    var element = e.formInputs.sfdc_opp_fields[i].split(":")[0]
     oppQuery = oppQuery + element + ",+"
   }
 
@@ -181,7 +181,7 @@ function retrieveOppsOwnedByCurrentUser(e) {
 function createSheetForNewOpp(e) {
 
   var activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  var oppFields = getOpportunityFields();
+  // var oppFields = getOpportunityFields();
 
   var oppMap = activeSpreadsheet.getSheetByName("Opp Map");
 
@@ -212,18 +212,20 @@ function createSheetForNewOpp(e) {
 
   for(i=0; i < numColumns; i++) {
 
-    var element = e.formInputs.sfdc_opp_fields[i];
+    var element = e.formInputs.sfdc_opp_fields[i].split(":");
 
-    if(oppFields[element] == null) {
+    headerRowIds.push(element[0]);
+    headerRowLabels.push(element[1]);
+    // if(oppFields[element] == null) {
 
-      headerRowLabels.push(element.replace("."," "));
-      headerRowIds.push(element);
+    //   headerRowLabels.push(element.replace("."," "));
+    //   headerRowIds.push(element);
 
-    } else {
+    // } else {
       
-      headerRowLabels.push(oppFields[element].label)
-      headerRowIds.push(element)
-    }   
+    //   headerRowLabels.push(oppFields[element].label)
+    //   headerRowIds.push(element)
+    // }   
 
   };
 
