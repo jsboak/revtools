@@ -52,11 +52,11 @@ function addColumnsToExistingTerritoryMap(territorySheet, e, firstEmptyColumn) {
   var headerRowIds = [];
 
   for(i=0; i < numberOfFields; i++) {
-    var element = e.formInputs.sfdc_territory_fields[i];
+    var element = e.formInputs.sfdc_territory_fields[i].split(":");
 
     // Logger.log(accountFields[element]);    
-    headerRowLabels.push(accountFields[element].label)
-    headerRowIds.push(element)
+    headerRowLabels.push(element[1])
+    headerRowIds.push(element[0])
   };
 
   if(e.formInput.include_open_opp_key) {
@@ -216,6 +216,7 @@ function retrieveAccountsOwnedByCurrentUser(e) {
   }
 
   var accountQuery = "SELECT+Name,Id,+";
+
   e.formInputs.sfdc_territory_fields.forEach(element =>
     accountQuery = accountQuery + element.split(":")[0] + ",+"
   );

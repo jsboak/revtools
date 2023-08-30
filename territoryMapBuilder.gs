@@ -30,7 +30,7 @@ function goToTerritoryBuilder(e) {
       )
       builder.addSection(CardService.newCardSection()
       .setCollapsible(true)
-      .addWidget(generateFieldsSelector(sfdcAccountFields, "sfdc_territory_fields", "")
+      .addWidget(generateTerritoryFieldsSelector(sfdcAccountFields, "sfdc_territory_fields", "")
       ))
 
       builder.addSection(CardService.newCardSection()
@@ -80,19 +80,10 @@ function goToTerritoryBuilder(e) {
 
 }
 
-function generateFieldsSelector(sfdcAccountFields, fieldName, fieldTitle) {
+function generateTerritoryFieldsSelector(sfdcAccountFields, fieldName, fieldTitle) {
   var selectionInput = CardService.newSelectionInput().setTitle(fieldTitle)
     .setFieldName(fieldName)
     .setType(CardService.SelectionInputType.CHECK_BOX);
-
-  // Object.keys(sfdcAccountFields).sort().
-  //   forEach((function(v, i) {
-
-  //     if( sfdcAccountFields[v].label != "Account Name") {
-  //       selectionInput.addItem(sfdcAccountFields[v].label, v, false);
-  //     }
-
-  //   }));
 
   sfdcAccountFields.sort(function (a, b) {
       return a.label.localeCompare(b.label);
@@ -100,23 +91,26 @@ function generateFieldsSelector(sfdcAccountFields, fieldName, fieldTitle) {
 
   for (var i=0; i< sfdcAccountFields.length; i++) {
 
-    selectionInput.addItem(sfdcAccountFields[i]["label"], sfdcAccountFields[i].name + ":" + sfdcAccountFields[i].label, false);
+    if(sfdcAccountFields[i]["label"].trim() != "Account Name") {
+
+      selectionInput.addItem(sfdcAccountFields[i]["label"], sfdcAccountFields[i].name + ":" + sfdcAccountFields[i].label, false);
+    }
 
   }
 
   return selectionInput;
 }
 
-function generateFieldsDropdown(sfdcAccountFields, fieldName, fieldTitle) {
-  var selectionInput = CardService.newSelectionInput().setTitle(fieldTitle)
-    .setFieldName(fieldName)
-    .setType(CardService.SelectionInputType.DROPDOWN);
+// function generateFieldsDropdown(sfdcAccountFields, fieldName, fieldTitle) {
+//   var selectionInput = CardService.newSelectionInput().setTitle(fieldTitle)
+//     .setFieldName(fieldName)
+//     .setType(CardService.SelectionInputType.DROPDOWN);
 
-  Object.keys(sfdcAccountFields).sort().
-    forEach((function(v, i) {
+//   Object.keys(sfdcAccountFields).sort().
+//     forEach((function(v, i) {
 
-      selectionInput.addItem(sfdcAccountFields[v].label, v, false);
-    }));
+//       selectionInput.addItem(sfdcAccountFields[v].label, v, false);
+//     }));
 
-  return selectionInput;
-}
+//   return selectionInput;
+// }
