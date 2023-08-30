@@ -85,14 +85,24 @@ function generateFieldsSelector(sfdcAccountFields, fieldName, fieldTitle) {
     .setFieldName(fieldName)
     .setType(CardService.SelectionInputType.CHECK_BOX);
 
-  Object.keys(sfdcAccountFields).sort().
-    forEach((function(v, i) {
+  // Object.keys(sfdcAccountFields).sort().
+  //   forEach((function(v, i) {
 
-      if( sfdcAccountFields[v].label != "Account Name") {
-        selectionInput.addItem(sfdcAccountFields[v].label, v, false);
-      }
+  //     if( sfdcAccountFields[v].label != "Account Name") {
+  //       selectionInput.addItem(sfdcAccountFields[v].label, v, false);
+  //     }
 
-    }));
+  //   }));
+
+  sfdcAccountFields.sort(function (a, b) {
+      return a.label.localeCompare(b.label);
+  });
+
+  for (var i=0; i< sfdcAccountFields.length; i++) {
+
+    selectionInput.addItem(sfdcAccountFields[i]["label"], sfdcAccountFields[i].name + ":" + sfdcAccountFields[i].label, false);
+
+  }
 
   return selectionInput;
 }

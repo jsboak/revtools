@@ -54,15 +54,6 @@ function goToOppBuilder(e) {
     return;
   }
 
-  // var cardAction = CardService.newCardAction()
-  //   .setText("Go to SFDC Page")
-  //   .setOpenLink(CardService.newOpenLink()
-  //       .setUrl("https://www.google.com")
-  //       .setOpenAs(CardService.OpenAs.OVERLAY)
-  //       .setOnClose(CardService.OnClose.NOTHING))
-
-  // builder.addCardAction(cardAction);
-
   return builder.build();
 
 }
@@ -73,33 +64,17 @@ function generateFieldsSelector(sfdcOppFields, fieldName, fieldTitle) {
     .setFieldName(fieldName)
     .setType(CardService.SelectionInputType.CHECK_BOX);
 
+  sfdcOppFields.push({"name":"Account.Name","label":"Account Name","type":"String"});
+
   sfdcOppFields.sort(function (a, b) {
       return a.label.localeCompare(b.label);
   });
 
   for (var i=0; i< sfdcOppFields.length; i++) {
 
-    // fieldsList.push({"name":parsedOppFields.fields[i].name,"label":parsedOppFields.fields[i].label, "type":parsedOppFields.fields[i].type})
-
-    // fieldsList[parsedOppFields.fields[i].name] = {"label":parsedOppFields.fields[i].label, "type":parsedOppFields.fields[i].type}
-
     selectionInput.addItem(sfdcOppFields[i]["label"], sfdcOppFields[i].name + ":" + sfdcOppFields[i].label, false);
 
   }
-
-  // sfdcOppFields["Account.Name"] = {"label":"Account Name", "type":"String"}
-
-  // Object.keys(sfdcOppFields).sort().
-  //   forEach((function(v, i) {
-
-  //     if( sfdcOppFields[v].label != "Name") {
-  //       selectionInput.addItem(sfdcOppFields[v].label, v, false);
-
-  //     }
-
-  //   }));
-
-  // selectionInput.addItem("Account Name","Account.Name",false)
 
   return selectionInput;
 }

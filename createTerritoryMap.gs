@@ -110,7 +110,7 @@ function addDataToNewTerritoryMap(territorySheet, e, existing, firstEmptyColumn)
 
       for(i=0; i < numColumns; i++) {
 
-        var accountField = e.formInputs.sfdc_territory_fields[i];
+        var accountField = e.formInputs.sfdc_territory_fields[i].split(":")[0];
         if(accountField == "null") {
           accountField = "";
         }      
@@ -140,7 +140,7 @@ function addDataToNewTerritoryMap(territorySheet, e, existing, firstEmptyColumn)
 
       for(i=0; i < numColumns; i++) {
 
-        var accountField = e.formInputs.sfdc_territory_fields[i];
+        var accountField = e.formInputs.sfdc_territory_fields[i].split(":")[0];
         if(accountField == "null") {
           accountField = "";
         }      
@@ -217,7 +217,7 @@ function retrieveAccountsOwnedByCurrentUser(e) {
 
   var accountQuery = "SELECT+Name,Id,+";
   e.formInputs.sfdc_territory_fields.forEach(element =>
-    accountQuery = accountQuery + element + ",+"
+    accountQuery = accountQuery + element.split(":")[0] + ",+"
   );
 
   accountQuery = accountQuery.substring(0, accountQuery.length-2) + `${oppQuery}` + `+from+Account+WHERE+OwnerId='${currentSfdcUser}'`;
@@ -234,7 +234,7 @@ function retrieveAccountsOwnedByCurrentUser(e) {
 function createSheetForNewTerritory(e) {
 
   var activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  var accountFields = getAccountFields();
+  // var accountFields = getAccountFields();
 
   var territoryMap = activeSpreadsheet.getSheetByName("Territory Map");
 
@@ -264,11 +264,11 @@ function createSheetForNewTerritory(e) {
   var headerRowIds = ["Name"];
 
   for(i=0; i < numColumns; i++) {
-    var element = e.formInputs.sfdc_territory_fields[i];
+    var element = e.formInputs.sfdc_territory_fields[i].split(":");
 
     // Logger.log(accountFields[element]);    
-    headerRowLabels.push(accountFields[element].label)
-    headerRowIds.push(element)
+    headerRowLabels.push(element[1])
+    headerRowIds.push(element[0])
   };
 
   if(e.formInput.include_open_opp_key) {

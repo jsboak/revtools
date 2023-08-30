@@ -8,15 +8,7 @@ function getAccountFields() {
   }
   var parsedAccountFields = JSON.parse(accountFields);
 
-  var fieldsList = {};
-
-  for (var i=0; i< parsedAccountFields.fields.length; i++) {
-
-      fieldsList[parsedAccountFields.fields[i].name] = {"label":parsedAccountFields.fields[i].label, "type":parsedAccountFields.fields[i].type}
-
-  }
-
-  return fieldsList;
+  return parsedAccountFields.fields;
   
 }
 
@@ -29,19 +21,6 @@ function getOpportunityFields() {
   }
   var parsedOppFields = JSON.parse(oppFields);
 
-  var fieldsList = {};
-
-  // Logger.log(parsedOppFields.fields);
-  // for (var i=0; i< parsedOppFields.fields.length; i++) {
-
-  //     // fieldsList.push({"name":parsedOppFields.fields[i].name,"label":parsedOppFields.fields[i].label, "type":parsedOppFields.fields[i].type})
-
-  //     fieldsList[parsedOppFields.fields[i].name] = {"label":parsedOppFields.fields[i].label, "type":parsedOppFields.fields[i].type}
-
-  // }
-
-  // Logger.log("FieldsList: " + fieldsList);
   return parsedOppFields.fields;
-
 
 }
