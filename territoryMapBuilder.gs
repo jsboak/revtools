@@ -100,17 +100,3 @@ function generateTerritoryFieldsSelector(sfdcAccountFields, fieldName, fieldTitl
 
   return selectionInput;
 }
-
-// function generateFieldsDropdown(sfdcAccountFields, fieldName, fieldTitle) {
-//   var selectionInput = CardService.newSelectionInput().setTitle(fieldTitle)
-//     .setFieldName(fieldName)
-//     .setType(CardService.SelectionInputType.DROPDOWN);
-
-//   Object.keys(sfdcAccountFields).sort().
-//     forEach((function(v, i) {
-
-//       selectionInput.addItem(sfdcAccountFields[v].label, v, false);
-//     }));
-
-//   return selectionInput;
-// }

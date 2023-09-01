@@ -78,17 +78,3 @@ function generateFieldsSelector(sfdcOppFields, fieldName, fieldTitle) {
 
   return selectionInput;
 }
-
-function generateFieldsDropdown(sfdcOppFields, fieldName, fieldTitle) {
-  var selectionInput = CardService.newSelectionInput().setTitle(fieldTitle)
-    .setFieldName(fieldName)
-    .setType(CardService.SelectionInputType.DROPDOWN);
-
-  Object.keys(sfdcOppFields).sort().
-    forEach((function(v, i) {
-
-      selectionInput.addItem(sfdcOppFields[v].label, v, false);
-    }));
-
-  return selectionInput;
-}

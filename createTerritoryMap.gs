@@ -13,6 +13,7 @@ function createNewTerritoryMap(e) {
       var firstEmptyColumn = firstEmptyFirstRow;
     }
 
+    Logger.log("firstEmptyColumn: " + firstEmptyColumn)
     addDataToNewTerritoryMap(territorySheet, e, true, firstEmptyColumn); //Need to create new method for adding columns to existing sheet
     addColumnsToExistingTerritoryMap(territorySheet, e, firstEmptyColumn);
 
@@ -22,7 +23,7 @@ function createNewTerritoryMap(e) {
 
     var territoryMapSheet = createSheetForNewTerritory(e);
 
-    addDataToNewTerritoryMap(territoryMapSheet, e, false);
+    addDataToNewTerritoryMap(territoryMapSheet, e, false, 2);
 
     PropertiesService.getUserProperties().setProperty("territoryMapName", territoryMapSheet.getName());
 
@@ -38,7 +39,7 @@ function createNewTerritoryMap(e) {
 
 function addColumnsToExistingTerritoryMap(territorySheet, e, firstEmptyColumn) {
 
-  var accountFields = getAccountFields();
+  // var accountFields = getAccountFields();
 
   var numberOfFields = e.formInputs.sfdc_territory_fields.length;
 
@@ -121,7 +122,6 @@ function addDataToNewTerritoryMap(territorySheet, e, existing, firstEmptyColumn)
       territoryMatrix.push(accountRow)
       
     }
-    territorySheet.getRange(3,2,accounts.totalSize, numColumns+1).setHorizontalAlignment("center");
 
   } else {
 
@@ -169,14 +169,15 @@ function addDataToNewTerritoryMap(territorySheet, e, existing, firstEmptyColumn)
     }
 
     territorySheet.getRange(3,2,accounts.totalSize, numColumns+2).setHorizontalAlignment("center");
-    var oppMatrix = territorySheet.getRange(3,numColumns+2,accounts.totalSize,1);
+    var oppMatrix = territorySheet.getRange(3,firstEmptyColumn+numColumns,accounts.totalSize,1);
     oppMatrix.setRichTextValues(oppNameMap);
-    var oppNextStepMatrix = territorySheet.getRange(3,numColumns+3,accounts.totalSize,1);
+    var oppNextStepMatrix = territorySheet.getRange(3,firstEmptyColumn+numColumns+1,accounts.totalSize,1);
     oppNextStepMatrix.setValues(oppNextStepMap);
     var oppIdMatrix = territorySheet.getRange(3,25,accounts.totalSize,1);
     oppIdMatrix.setValues(oppIdMap);
   }
 
+  territorySheet.getRange(3,2,accounts.totalSize, numColumns+1).setHorizontalAlignment("center");
   territoryMap.setValues(territoryMatrix).setHorizontalAlignment("center");
   var accountNameMap = territorySheet.getRange(3,1,accounts.totalSize,1);
   accountNameMap.setRichTextValues(accountNameMatrix);
@@ -216,7 +217,6 @@ function retrieveAccountsOwnedByCurrentUser(e) {
   }
 
   var accountQuery = "SELECT+Name,Id,+";
-
   e.formInputs.sfdc_territory_fields.forEach(element =>
     accountQuery = accountQuery + element.split(":")[0] + ",+"
   );
