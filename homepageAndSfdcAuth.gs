@@ -47,7 +47,7 @@ function onHomepage(e) {
         .setText("Thresholds & Alerts")
         .setOnClickAction(CardService.newAction().setFunctionName('goToThresholdBuilder'))
         .setStartIcon(CardService.newIconImage().setIcon(CardService.Icon.PHONE))
-        .setBottomLabel("Get notified when specified fields match desired criteria.")
+        .setBottomLabel("Get notified when specified fields match desired criteria. Only available for Territory Map.")
         .setWrapText(true))
     );
 
