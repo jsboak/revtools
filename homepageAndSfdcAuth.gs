@@ -53,7 +53,7 @@ function onHomepage(e) {
 
     builder.addSection(CardService.newCardSection()
     .addWidget(CardService.newDecoratedText()
-      .setText("Pull Updated Data from SFDC")
+      .setText("Update Sheet from Salesforce")
       .setOnClickAction(CardService.newAction().setFunctionName('updateSheetFromSfdcPull'))
       .setStartIcon(CardService.newIconImage().setIconUrl("https://upload.wikimedia.org/wikipedia/commons/8/89/Salesforce_Users_Email_list.png"))
       .setEndIcon(CardService.newIconImage().setIconUrl("https://upload.wikimedia.org/wikipedia/commons/8/89/Salesforce_Users_Email_list.png"))
