@@ -39,7 +39,8 @@ function createNewOppMap(e) {
 
 function addColumnsToExistingOppMap(oppSheet, e, firstEmptyColumn) {
 
-  var oppFields = getOppFields();
+  var oppFields = getOpportunityFields();
+
 
   var numberOfFields = e.formInputs.sfdc_opp_fields.length;
 
@@ -53,11 +54,12 @@ function addColumnsToExistingOppMap(oppSheet, e, firstEmptyColumn) {
   var headerRowIds = [];
 
   for(i=0; i < numberOfFields; i++) {
-    var element = e.formInputs.sfdc_opp_fields[i];
 
     // Logger.log(oppFields[element]);    
-    headerRowLabels.push(oppFields[element].label)
-    headerRowIds.push(element)
+    var element = e.formInputs.sfdc_opp_fields[i].split(":");
+
+    headerRowIds.push(element[0]);
+    headerRowLabels.push(element[1]);
   };
 
   columnMatrix.push(headerRowLabels);
